@@ -1,6 +1,7 @@
 /**
  * Configuracion unica del frontend.
  * Si cambia el puerto o el nombre del .war, solo se cambia aqui.
+ * Es la misma URL que usan para ver el JSON en el navegador (sin el recurso final).
  */
 export const URL_API = "http://localhost:9080/CafefeSV-1.0-SNAPSHOT/resources/v1/";
 
@@ -13,7 +14,11 @@ export const ROLES = {
 };
 
 /**
- * idEmpleadoRol del "mesero virtual" (HU2): el camarero al que se asignan
- * las ordenes que hacen los clientes desde la app.
+ * "Mesero virtual" (HU2): empleado con rol Camarero que toma las ordenes que los
+ * clientes hacen desde la app. Se busca por nombre y apellido (sin importar
+ * mayusculas ni tildes), asi funciona en cualquier base de datos sin copiar ids.
  */
-export const ID_MESERO_VIRTUAL = "0858e8ef-df1a-49ad-b96d-88c7c18bedae";
+export const MESERO_VIRTUAL = {
+    nombre: "Mesero",
+    apellido: "Virtual"
+};

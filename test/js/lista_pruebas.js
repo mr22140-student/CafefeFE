@@ -1,0 +1,59 @@
+/**
+ * Lista de archivos de prueba (sin ".js", relativos a test/js/).
+ * Al crear un archivo de prueba nuevo, agreguenlo aqui.
+ */
+export const UNITARIAS = [
+    "control/texto_test",
+    "control/sesion_test",
+    "control/autenticacion_test",
+    "control/router_test",
+    "control/instalador_test",
+    "control/mesero_virtual_test",
+    "control/caja_service_test",
+    "control/caracteristica_service_test",
+    "control/descuento_service_test",
+    "control/descuento_producto_service_test",
+    "control/empleado_service_test",
+    "control/empleado_rol_service_test",
+    "control/factura_service_test",
+    "control/factura_orden_producto_service_test",
+    "control/orden_service_test",
+    "control/orden_producto_service_test",
+    "control/pago_service_test",
+    "control/pago_detalle_service_test",
+    "control/producto_service_test",
+    "control/producto_caracteristica_service_test",
+    "control/producto_tipo_producto_service_test",
+    "control/rol_service_test",
+    "control/tipo_caracteristica_service_test",
+    "control/tipo_descuento_service_test",
+    "control/tipo_producto_service_test",
+    "boundary/tarjeta_simple_test",
+    "boundary/estado_conexion_test",
+    "boundary/boton_instalar_test",
+    "boundary/pagina_login_test",
+    "boundary/pagina_orden_test",
+    "boundary/cafefe_app_test"
+];
+
+export const INTEGRACION = [
+    "control/caja_service_it",
+    "control/caracteristica_service_it",
+    "control/descuento_service_it",
+    "control/descuento_producto_service_it",
+    "control/empleado_service_it",
+    "control/empleado_rol_service_it",
+    "control/factura_service_it",
+    "control/factura_orden_producto_service_it",
+    "control/orden_service_it",
+    "control/orden_producto_service_it",
+    "control/pago_service_it",
+    "control/pago_detalle_service_it",
+    "control/producto_service_it",
+    "control/producto_caracteristica_service_it",
+    "control/producto_tipo_producto_service_it",
+    "control/rol_service_it",
+    "control/tipo_caracteristica_service_it",
+    "control/tipo_descuento_service_it",
+    "control/tipo_producto_service_it"
+];

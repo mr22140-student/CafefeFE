@@ -1,0 +1,51 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "chrome",
+            "runtimeExecutable": "/usr/bin/brave-browser",
+            "port": 9222,
+            "request": "launch",
+            "name": "BrowserSync Brave",
+            "url": "http://localhost:3000",
+            "webRoot": "${workspaceFolder}/src",
+            "preLaunchTask": "lanzarBrowserSync",
+            "postDebugTask": "matarBrowserSync"
+        },
+        {
+            "type": "chrome",
+            "runtimeExecutable": "/snap/bin/brave",
+            "port": 9222,
+            "request": "launch",
+            "name": "BrowserSync Brave (snap)",
+            "url": "http://localhost:3000",
+            "webRoot": "${workspaceFolder}/src",
+            "preLaunchTask": "lanzarBrowserSync",
+            "postDebugTask": "matarBrowserSync",
+            "userDataDir": "${env:HOME}/BraveDebugCafefe"
+        },
+        {
+            "type": "chrome",
+            "runtimeExecutable": "/usr/bin/brave-browser",
+            "port": 9222,
+            "request": "launch",
+            "name": "BrowserSync Debug",
+            "url": "http://localhost:3000",
+            "webRoot": "${workspaceFolder}/",
+            "preLaunchTask": "debugBrowserSync",
+            "postDebugTask": "matarBrowserSync"
+        },
+        {
+            "type": "chrome",
+            "runtimeExecutable": "/snap/bin/brave",
+            "port": 9222,
+            "request": "launch",
+            "name": "BrowserSync Debug (snap)",
+            "url": "http://localhost:3000",
+            "webRoot": "${workspaceFolder}/",
+            "preLaunchTask": "debugBrowserSync",
+            "postDebugTask": "matarBrowserSync",
+            "userDataDir": "${env:HOME}/BraveDebugCafefe"
+        }
+    ]
+}
