@@ -26,6 +26,7 @@ const ARCHIVOS = [
     "js/boundary/pagina_login.js",
     "js/boundary/pagina_no_encontrada.js",
     "js/boundary/pagina_orden.js",
+    "js/boundary/lista_productos.js",
     "js/boundary/pagina_pago.js",
     "js/boundary/pagina_recepcion.js",
     "js/boundary/tarjeta_simple.js",
