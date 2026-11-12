@@ -43,8 +43,8 @@ class CafefeEncabezado extends HTMLElement {
             ${ESTILOS}
             <style>
                 header {
-                    background: var(--color-superficie);
-                    border-bottom: 1px solid var(--color-borde);
+                    color: var(--pergamino);
+                    background: var(--expreso);
                     box-shadow: var(--sombra);
                 }
                 .barra {
@@ -60,22 +60,24 @@ class CafefeEncabezado extends HTMLElement {
                     display: flex;
                     align-items: center;
                     gap: var(--esp-2);
+                    font-family: var(--fuente-titulos);
                     font-size: var(--texto-xl);
-                    font-weight: 800;
+                    font-weight: 700;
                     letter-spacing: 0.04em;
-                    color: var(--color-primario);
+                    color: var(--pergamino);
                     text-decoration: none;
                 }
+                .marca img { border-radius: 50%; background: var(--pergamino); }
                 nav { display: flex; flex-wrap: wrap; gap: var(--esp-1); flex: 1; }
                 nav a {
                     padding: var(--esp-2) var(--esp-3);
                     border-radius: var(--radio-sm);
-                    color: var(--color-texto);
+                    color: var(--pergamino);
                     font-weight: 600;
                     text-decoration: none;
                 }
-                nav a:hover { background: var(--color-primario-claro); }
-                nav a[aria-current="page"] { color: var(--color-primario); background: var(--color-primario-claro); }
+                nav a:hover { background: rgb(255 255 255 / 0.12); }
+                nav a[aria-current="page"] { color: var(--expreso); background: var(--chambray); }
                 .cuenta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--esp-3); }
                 .saludo { font-size: var(--texto-sm); }
                 .rol {
@@ -85,8 +87,8 @@ class CafefeEncabezado extends HTMLElement {
                     font-size: var(--texto-xs);
                     font-weight: 700;
                     text-transform: uppercase;
-                    color: var(--color-acento);
-                    background: #e3f2ef;
+                    color: var(--expreso);
+                    background: var(--azul-palido);
                 }
                 .cuenta .boton { min-height: 2.25rem; padding-block: var(--esp-1); }
                 @media (max-width: 40rem) {

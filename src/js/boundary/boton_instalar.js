@@ -18,7 +18,7 @@ class BotonInstalar extends HTMLElement {
             ${ESTILOS}
             <style>
                 :host { display: inline-block; }
-                .boton { min-height: 2.25rem; padding-block: var(--esp-1); background: var(--color-acento); }
+                .boton { min-height: 2.25rem; padding-block: var(--esp-1); color: var(--color-texto); background: var(--color-acento); }
                 .boton:hover { background: var(--color-acento-oscuro); }
             </style>
             <button type="button" class="boton">

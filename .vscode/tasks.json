@@ -9,7 +9,17 @@
         "reveal": "silent"
       },
       "isBackground": true,
-      "problemMatcher": []
+      "problemMatcher": {
+        "owner": "browsersync",
+        "pattern": {
+          "regexp": "^__sin_errores__$"
+        },
+        "background": {
+          "activeBegins": true,
+          "beginsPattern": "\\[Browsersync\\]",
+          "endsPattern": "Serving files from"
+        }
+      }
     },
     {
       "label": "debugBrowserSync",
@@ -19,7 +29,17 @@
         "reveal": "silent"
       },
       "isBackground": true,
-      "problemMatcher": []
+      "problemMatcher": {
+        "owner": "browsersync",
+        "pattern": {
+          "regexp": "^__sin_errores__$"
+        },
+        "background": {
+          "activeBegins": true,
+          "beginsPattern": "\\[Browsersync\\]",
+          "endsPattern": "Serving files from"
+        }
+      }
     },
     {
       "label": "matarBrowserSync",

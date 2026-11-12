@@ -45,8 +45,10 @@ class PaginaOrden extends HTMLElement {
                 .categoria img { width: 100%; height: 7rem; object-fit: contain; }
                 .estado { font-size: var(--texto-xs); color: var(--color-texto-suave); }
             </style>
-            <h1>¡Bienvenido a Cafefe!</h1>
-            <p>Elija una categoría para ver sus productos.</p>
+            <section class="portada">
+                <h1>¡Bienvenido a Cafefe!</h1>
+                <p>Elija una categoría para ver sus productos.</p>
+            </section>
             <p class="alerta alerta--error" role="alert" id="error"></p>
             <section aria-label="Categorías" aria-busy="true">
                 <div class="rejilla" id="categorias"><p class="vacio">Cargando categorías…</p></div>

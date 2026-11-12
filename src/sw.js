@@ -13,7 +13,7 @@
  *
  * IMPORTANTE: si agregan archivos nuevos, agreguenlos a ARCHIVOS y suban VERSION.
  */
-const VERSION = "cafefe-v3";
+const VERSION = "cafefe-v4";
 
 const ARCHIVOS = [
     "./",
