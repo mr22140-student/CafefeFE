@@ -11,9 +11,8 @@
  *   - el API REST (otro origen: localhost:9080) -> siempre va a la red
  *   - browser-sync (/browser-sync/...)
  *
- * IMPORTANTE: si agregan archivos nuevos, agreguenlos a ARCHIVOS y suban VERSION.
  */
-const VERSION = "cafefe-v6";
+const VERSION = "cafefe-v7";
 
 const ARCHIVOS = [
     "./",
