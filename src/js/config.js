@@ -1,16 +1,19 @@
-**
- * Punto de entrada de la SPA.
- * 1. Importa el instalador primero para no perder "beforeinstallprompt".
- * 2. Registra los Web Components (al importar cafefe_app se registran todos).
- * 3. Registra el service worker (PWA: instalable y sin conexion).
+/**
+ * Configuracion unica del frontend.
+ * Si cambia el puerto o el nombre del .war, solo se cambia aqui.
  */
-import "./control/instalador.js";
-import "./boundary/cafefe_app.js";
+export const URL_API = "http://localhost:9080/CafefeSV-1.0-SNAPSHOT/resources/v1/";
 
-if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-        navigator.serviceWorker.register("sw.js").catch(error => {
-            console.error("No se pudo registrar el service worker", error);
-        });
-    });
-}
+/** Nombres de rol tal como estan en la tabla rol (se comparan sin tildes ni mayusculas). */
+export const ROLES = {
+    CAMARERO: "camarero",
+    CAJERO: "cajero",
+    BARISTA: "barista",
+    COCINERO: "cocinero"
+};
+
+/**
+ * idEmpleadoRol del "mesero virtual" (HU2): el camarero al que se asignan
+ * las ordenes que hacen los clientes desde la app.
+ */
+export const ID_MESERO_VIRTUAL = "0858e8ef-df1a-49ad-b96d-88c7c18bedae";
