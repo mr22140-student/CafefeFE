@@ -33,6 +33,7 @@ export const UNITARIAS = [
     "boundary/pagina_login_test",
     "boundary/pagina_orden_test",
     "boundary/lista_productos_test",
+    "boundary/carrito_orden_test",
     "boundary/cafefe_app_test"
 ];
 
