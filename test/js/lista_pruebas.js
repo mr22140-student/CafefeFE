@@ -1,6 +1,5 @@
 /**
  * Lista de archivos de prueba (sin ".js", relativos a test/js/).
- * Al crear un archivo de prueba nuevo, agreguenlo aqui.
  */
 export const UNITARIAS = [
     "control/texto_test",
@@ -9,6 +8,7 @@ export const UNITARIAS = [
     "control/router_test",
     "control/instalador_test",
     "control/mesero_virtual_test",
+    "control/orden_cliente_test",
     "control/cobro_test",
     "control/caja_service_test",
     "control/caracteristica_service_test",
@@ -34,6 +34,8 @@ export const UNITARIAS = [
     "boundary/boton_instalar_test",
     "boundary/pagina_login_test",
     "boundary/pagina_orden_test",
+    "boundary/lista_productos_test",
+    "boundary/carrito_orden_test",
     "boundary/lista_ordenes_pendientes_test",
     "boundary/formulario_pago_test",
     "boundary/ticket_factura_test",
