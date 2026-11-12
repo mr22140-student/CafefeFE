@@ -54,12 +54,16 @@ suite("<pagina-orden> categorias", function () {
     });
 
     test("si el servidor falla deberia mostrar el error", async function () {
-        let error = new DefaultError();
-        error.mensaje = "Dato invalido"; error.estado = 422;
-        tipoProductoService.findRange.rejects(error);
-        let pagina = montar("pagina-orden", { tipoProductoService });
+              chai.expect(pagina.shadowRoot.querySelector("#error").textContent).to.equal("Dato invalido");
+    });
+
+    test("al elegir una categoria deberia mostrar sus productos", async function () {
+        let pagina = montar("pagina-orden", { tipoProductoService, productoTipoProductoService });
         await esperar();
-        chai.expect(pagina.shadowRoot.querySelector("#error").textContent).to.equal("Dato invalido");
+        pagina.shadowRoot.querySelector('[data-id="t1"]').click();
+        await esperar();
+        chai.expect(pagina.shadowRoot.querySelector("lista-productos").getAttribute("categoria")).to.equal("t1");
+        chai.expect(productoTipoProductoService.findByTipoProducto.calledOnceWith("t1")).to.equal(true);
     });
 });
 
@@ -72,16 +76,7 @@ suite("<pagina-orden> sin conexion", function () {
         let tipoProductoService = { findRange: sinon.stub().rejects(error) };
         let pagina = montar("pagina-orden", { tipoProductoService });
         await esperar();
-                chai.expect(pagina.shadowRoot.querySelector("#error").textContent).to.equal("Dato invalido");
-    });
-
-    test("al elegir una categoria deberia mostrar sus productos", async function () {
-        let pagina = montar("pagina-orden", { tipoProductoService, productoTipoProductoService });
-        await esperar();
-        pagina.shadowRoot.querySelector('[data-id="t1"]').click();
-        await esperar();
-        chai.expect(pagina.shadowRoot.querySelector("lista-productos").getAttribute("categoria")).to.equal("t1");
-        chai.expect(productoTipoProductoService.findByTipoProducto.calledOnceWith("t1")).to.equal(true);
+        chai.expect(pagina.shadowRoot.querySelector("#error").textContent).to.contain("no hay conexión");
     });
 });
 
