@@ -8,6 +8,7 @@ export const UNITARIAS = [
     "control/router_test",
     "control/instalador_test",
     "control/mesero_virtual_test",
+    "control/orden_cliente_test",
     "control/caja_service_test",
     "control/caracteristica_service_test",
     "control/descuento_service_test",

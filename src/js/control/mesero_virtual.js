@@ -45,6 +45,7 @@ class MeseroVirtual {
     error() {
         let error = new DefaultError();
         error.mensaje = SIN_MESERO;
+        error.estado = 422;
         return error;
     }
 }

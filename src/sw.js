@@ -13,7 +13,7 @@
  *
  * IMPORTANTE: si agregan archivos nuevos, agreguenlos a ARCHIVOS y suban VERSION.
  */
-const VERSION = "cafefe-v4";
+const VERSION = "cafefe-v5";
 
 const ARCHIVOS = [
     "./",
@@ -44,6 +44,7 @@ const ARCHIVOS = [
     "js/control/factura_service.js",
     "js/control/instalador.js",
     "js/control/mesero_virtual.js",
+    "js/control/orden_cliente.js",
     "js/control/orden_producto_service.js",
     "js/control/orden_service.js",
     "js/control/pago_detalle_service.js",
