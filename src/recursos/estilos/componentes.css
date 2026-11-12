@@ -14,13 +14,13 @@
     box-sizing: border-box;
 }
 
-:host([hidden]) {
+:host([hidden]),
+[hidden] {
     display: none !important;
 }
 
 h1, h2, h3 {
     margin: 0 0 var(--esp-3);
-    font-family: var(--fuente-titulos);
     line-height: 1.2;
     color: var(--color-texto);
 }
@@ -37,32 +37,6 @@ a {
     color: var(--color-primario);
 }
 
-/* ---------- Portada (franja de bienvenida, como el encabezado de CafefeSV) ---------- */
-.portada {
-    position: relative;
-    overflow: hidden;
-    margin-bottom: var(--esp-5);
-    padding: var(--esp-6);
-    border-radius: var(--radio-lg);
-    background: linear-gradient(110deg, var(--color-superficie) 35%, var(--azul-palido) 75%, var(--chambray) 100%);
-    box-shadow: var(--sombra);
-}
-
-.portada::after {
-    content: "";
-    position: absolute;
-    right: -4rem;
-    bottom: -6rem;
-    width: 16rem;
-    height: 16rem;
-    border-radius: 50%;
-    background: rgb(255 255 255 / 0.35);
-}
-
-.portada > * {
-    position: relative;
-}
-
 /* ---------- Botones ---------- */
 .boton {
     display: inline-flex;
@@ -70,11 +44,11 @@ a {
     justify-content: center;
     gap: var(--esp-2);
     min-height: var(--altura-toque);
-    padding: var(--esp-2) var(--esp-5);
+    padding: var(--esp-2) var(--esp-4);
     border: 1px solid transparent;
     border-radius: var(--radio-sm);
     font: inherit;
-    font-weight: 700;
+    font-weight: 600;
     text-decoration: none;
     cursor: pointer;
     color: #fff;
@@ -85,8 +59,7 @@ a {
 .boton:hover { background: var(--color-primario-oscuro); }
 .boton:active { transform: translateY(1px); }
 
-/* Chambray con texto expreso: el blanco sobre chambray no se lee bien */
-.boton--acento { color: var(--color-texto); background: var(--color-acento); }
+.boton--acento { background: var(--color-acento); }
 .boton--acento:hover { background: var(--color-acento-oscuro); }
 
 .boton--secundario {
@@ -157,7 +130,7 @@ input[aria-invalid="true"] {
 .rejilla {
     display: grid;
     gap: var(--esp-4);
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 9.5rem), 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 11rem), 1fr));
 }
 
 /* ---------- Mensajes ---------- */
