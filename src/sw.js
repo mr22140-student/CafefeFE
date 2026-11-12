@@ -13,7 +13,7 @@
  *
  * IMPORTANTE: si agregan archivos nuevos, agreguenlos a ARCHIVOS y suban VERSION.
  */
-const VERSION = "cafefe-v5";
+const VERSION = "cafefe-v6";
 
 const ARCHIVOS = [
     "./",
@@ -22,7 +22,10 @@ const ARCHIVOS = [
     "js/boundary/cafefe_app.js",
     "js/boundary/cafefe_encabezado.js",
     "js/boundary/estado_conexion.js",
+    "js/boundary/detalle_orden.js",
     "js/boundary/estilos.js",
+    "js/boundary/formulario_pago.js",
+    "js/boundary/lista_ordenes_pendientes.js",
     "js/boundary/pagina_login.js",
     "js/boundary/pagina_no_encontrada.js",
     "js/boundary/pagina_orden.js",
@@ -31,10 +34,12 @@ const ARCHIVOS = [
     "js/boundary/pagina_pago.js",
     "js/boundary/pagina_recepcion.js",
     "js/boundary/tarjeta_simple.js",
+    "js/boundary/ticket_factura.js",
     "js/config.js",
     "js/control/autenticacion.js",
     "js/control/caja_service.js",
     "js/control/caracteristica_service.js",
+    "js/control/cobro.js",
     "js/control/default_service.js",
     "js/control/descuento_producto_service.js",
     "js/control/descuento_service.js",

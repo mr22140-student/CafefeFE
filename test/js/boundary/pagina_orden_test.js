@@ -53,10 +53,15 @@ suite("<pagina-orden> categorias", function () {
         chai.expect(pagina.shadowRoot.querySelector('[data-id="t1"]').getAttribute("aria-pressed")).to.equal("true");
     });
 
-    test("si el servidor falla deberia mostrar el error", async function () {
-              chai.expect(pagina.shadowRoot.querySelector("#error").textContent).to.equal("Dato invalido");
+        test("si el servidor falla deberia mostrar el error", async function () {
+        let error = new DefaultError();
+        error.mensaje = "Dato invalido"; error.estado = 422;
+        tipoProductoService.findRange.rejects(error);
+        let pagina = montar("pagina-orden", { tipoProductoService });
+        await esperar();
+        chai.expect(pagina.shadowRoot.querySelector("#error").textContent).to.equal("Dato invalido");
     });
-
+    
     test("al elegir una categoria deberia mostrar sus productos", async function () {
         let pagina = montar("pagina-orden", { tipoProductoService, productoTipoProductoService });
         await esperar();

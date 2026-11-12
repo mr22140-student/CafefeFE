@@ -14,7 +14,8 @@
     box-sizing: border-box;
 }
 
-:host([hidden]) {
+:host([hidden]),
+[hidden] {
     display: none !important;
 }
 
