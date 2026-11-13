@@ -7,7 +7,7 @@ import "./tarjeta_simple.js";
 import "./lista_productos.js";
 import "./carrito_orden.js";
 
-const IMAGEN_POR_DEFECTO = "recursos/imagenes/tipo_producto/default.svg";
+/**Imagen de cada categoria: recursos/imagenes/tipo_producto/{idTipoProducto}.png (si no existe, se usa default.png).
 
 /**
  * <pagina-orden>
@@ -111,7 +111,7 @@ class PaginaOrden extends HTMLElement {
                     ${c.activo ? "" : "disabled"} aria-pressed="${this.seleccionada === c.idTipoProducto}">
                 <tarjeta-simple ${c.activo ? "" : "inactiva"} ${this.seleccionada === c.idTipoProducto ? "seleccionada" : ""}>
                     <span slot="titulo">${escapar(c.nombre)}</span>
-                    <img slot="contenido" alt="" src="recursos/imagenes/tipo_producto/${escapar(c.idTipoProducto)}.svg">
+                    <img slot="contenido" alt="" src="recursos/imagenes/tipo_producto/${escapar(c.idTipoProducto)}.png">
                     <span slot="pie" class="estado">${c.activo ? "" : "No disponible"}</span>
                 </tarjeta-simple>
             </button>`).join("");
