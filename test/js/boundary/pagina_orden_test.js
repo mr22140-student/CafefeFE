@@ -33,7 +33,7 @@ suite("<pagina-orden> categorias", function () {
         let pagina = montar("pagina-orden", { tipoProductoService });
         await esperar(300);
         let img = pagina.shadowRoot.querySelector('[data-id="t1"] img');
-        chai.expect(img.getAttribute("src")).to.contain("default.svg");
+        chai.expect(img.getAttribute("src")).to.contain("default.png");
     });
 
     test("una categoria inactiva no deberia poder seleccionarse", async function () {
