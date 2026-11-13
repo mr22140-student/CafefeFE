@@ -1,5 +1,5 @@
 import * as chai from "../lib/chai/index.js";
-import { normalizar, moneda, escapar, esUuid } from "../../../src/js/control/texto.js";
+import { normalizar, moneda, escapar, esUuid, marcarCliente, leerCliente } from "../../../src/js/control/texto.js";
 
 suite("texto", function () {
     test("normalizar deberia quitar tildes, espacios de mas y mayusculas", function () {
@@ -21,5 +21,12 @@ suite("texto", function () {
         chai.expect(esUuid("11111111-1111-4111-8111-000000000001")).to.equal(true);
         chai.expect(esUuid("Laura")).to.equal(false);
         chai.expect(esUuid("")).to.equal(false);
+    });
+
+    test("marcarCliente y leerCliente deberian guardar y recuperar el nombre del cliente", function () {
+        chai.expect(marcarCliente("  Ana ")).to.equal("Cliente: Ana");
+        chai.expect(leerCliente(marcarCliente("Ana López"))).to.equal("Ana López");
+        chai.expect(leerCliente("Descuento Clientes Preferenciales")).to.equal("");
+        chai.expect(leerCliente(null)).to.equal("");
     });
 });

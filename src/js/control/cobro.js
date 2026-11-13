@@ -3,6 +3,7 @@ import FacturaOrdenProductoService from "./factura_orden_producto_service.js";
 import PagoService from "./pago_service.js";
 import PagoDetalleService from "./pago_detalle_service.js";
 import DefaultError from "../entity/default_error.js";
+import { leerCliente } from "./texto.js";
 
 /** Formas de pago que acepta el backend (PagoDetalleDAO.TIPOS_PAGO). */
 export const TIPOS_PAGO = ["EFECTIVO", "TARJETA", "TRANSFERENCIA"];
@@ -62,13 +63,19 @@ export function prepararPagos(saldoInicial, pagos) {
     return { registrar, cambio };
 }
 
-/** Lo que el cajero vera como nombre del cliente: el que escribio al ordenar, si lo hay. */
+/**
+ * se busca la observacion
+ * "Cliente: Nombre". Las observaciones de las ordenes del backend (notas de los meseros,
+ * descuentos...) no son nombres y se ignoran: devuelve "".
+ */
 export function clienteDeOrden(productos) {
-    let conNombre = (productos ?? []).find(p => (p.observaciones ?? "").trim() !== "");
-    if (!conNombre) {
-        return "";
+    for (let producto of productos ?? []) {
+        let nombre = leerCliente(producto.observaciones);
+        if (nombre) {
+            return nombre;
+        }
     }
-    return conNombre.observaciones.trim().replace(/^cliente\s*:\s*/i, "");
+    return "";
 }
 
 function crearError(mensaje, causa = null) {

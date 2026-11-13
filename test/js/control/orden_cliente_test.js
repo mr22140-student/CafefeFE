@@ -43,7 +43,7 @@ suite("OrdenCliente", function () {
             idOrden: { idOrden: "o1" },
             idProducto: { idProducto: "p1" },
             precio: 3.5,
-            observaciones: "Marta"
+            observaciones: "Cliente: Marta"
         });
         chai.expect(resultado.detalles).to.have.lengthOf(3);
     });

@@ -42,10 +42,15 @@ suite("cobro: calculos", function () {
         chai.expect(() => prepararPagos(850, [{ tipoPago: "TARJETA", monto: 900 }])).to.throw();
     });
 
-    test("clienteDeOrden deberia tomar el nombre de las observaciones sin el prefijo", function () {
+        test("clienteDeOrden deberia tomar el nombre de la observacion 'Cliente: ...'", function () {
         chai.expect(clienteDeOrden([P2, P1])).to.equal("Ana");
-        chai.expect(clienteDeOrden([{ observaciones: "Luis" }])).to.equal("Luis");
+        chai.expect(clienteDeOrden([{ observaciones: "cliente:Luis" }])).to.equal("Luis");
         chai.expect(clienteDeOrden([P2])).to.equal("");
+    });
+
+    test("clienteDeOrden deberia ignorar las notas de los meseros del backend", function () {
+        chai.expect(clienteDeOrden([{ observaciones: "Descuento Clientes Preferenciales 10%" }])).to.equal("");
+        chai.expect(clienteDeOrden([{ observaciones: "sin azucar" }, P1])).to.equal("Ana");
     });
 });
 

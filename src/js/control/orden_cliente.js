@@ -2,6 +2,7 @@ import OrdenService from "./orden_service.js";
 import OrdenProductoService from "./orden_producto_service.js";
 import MeseroVirtual from "./mesero_virtual.js";
 import DefaultError from "../entity/default_error.js";
+import { marcarCliente } from "./texto.js";
 
 /**
 Crea la orden que el cliente arma en la app 
@@ -37,7 +38,7 @@ class OrdenCliente {
             idOrden: { idOrden: orden.idOrden },
             idProducto: { idProducto: producto.idProducto },
             precio: producto.precioSugerido,
-            observaciones: nombre
+            observaciones: marcarCliente(nombre)
         })));
         return { orden, detalles: respuestas.map(r => r.datos) };
     }
