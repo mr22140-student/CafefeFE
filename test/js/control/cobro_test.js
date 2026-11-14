@@ -1,7 +1,6 @@
 import * as chai from "../lib/chai/index.js";
 import sinon from "../lib/sinon/sinon-esm.js";
-import Cobro, { aCentavos, deCentavos, calcularResumen, prepararPagos, clienteDeOrden } from "../../../src/js/control/cobro.js";
-import DefaultResponse from "../../../src/js/entity/default_response.js";
+import Cobro, { aCentavos, deCentavos, calcularResumen, prepararPagos, clienteDeOrden, puedeCobrarse } from "../../../src/js/control/cobro.js";import DefaultResponse from "../../../src/js/entity/default_response.js";
 import { esperarRechazo } from "./pruebas_comunes.js";
 
 function respuesta(datos) {
@@ -12,6 +11,17 @@ function respuesta(datos) {
 
 const P1 = { idOrdenProducto: "op1", precio: 3.5, observaciones: "Cliente: Ana", idProducto: { nombre: "Cafe Americano" } };
 const P2 = { idOrdenProducto: "op2", precio: 5, observaciones: "", idProducto: { nombre: "Caffe Latte" } };
+
+suite("cobro: regla de preparacion", function () {
+    test("solo deberia poder cobrarse una orden que ya se empezo a preparar", function () {
+        chai.expect(puedeCobrarse("RECIBIDA")).to.equal(false);
+        chai.expect(puedeCobrarse(null)).to.equal(false);
+        chai.expect(puedeCobrarse(undefined)).to.equal(false);
+        chai.expect(puedeCobrarse("PREPARANDO")).to.equal(true);
+        chai.expect(puedeCobrarse("EN_CAMINO")).to.equal(true);
+        chai.expect(puedeCobrarse("ENTREGADA")).to.equal(true);
+    });
+});
 
 suite("cobro: calculos", function () {
     test("aCentavos y deCentavos deberian evitar errores de decimales", function () {

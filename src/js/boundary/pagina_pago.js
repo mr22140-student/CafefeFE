@@ -1,8 +1,8 @@
 import { ESTILOS } from "./estilos.js";
 import { sesion } from "../control/sesion.js";
 import CajaService from "../control/caja_service.js";
-import Cobro, { clienteDeOrden, deCentavos } from "../control/cobro.js";
-import { escapar, moneda } from "../control/texto.js";
+import OrdenService from "../control/orden_service.js";
+import Cobro, { clienteDeOrden, deCentavos, puedeCobrarse } from "../control/cobro.js";import { escapar, moneda } from "../control/texto.js";
 import "./lista_ordenes_pendientes.js";
 import "./detalle_orden.js";
 import "./formulario_pago.js";
@@ -15,7 +15,8 @@ import "./ticket_factura.js";
  *
  * Componentes que usa: <lista-ordenes-pendientes>, <detalle-orden>,
  * <formulario-pago> y <ticket-factura>. La logica esta en control/cobro.js.
- * Propiedades reemplazables en pruebas: sesion, cajaService, cobro.
+ * Solo se puede cobrar una orden que el barista ya empezo a preparar (puedeCobrarse).
+ * Propiedades reemplazables en pruebas: sesion, cajaService, ordenService, cobro.
  */
 class PaginaPago extends HTMLElement {
     constructor() {
@@ -23,6 +24,7 @@ class PaginaPago extends HTMLElement {
         this.attachShadow({ mode: "open" });
         this.sesion = sesion;
         this.cajaService = new CajaService();
+        this.ordenService = new OrdenService();
         this.cobro = new Cobro();
         this.cajas = [];
         this.seleccion = null;   // { orden, productos, total, cliente }
@@ -56,13 +58,14 @@ class PaginaPago extends HTMLElement {
             </div>
             <p class="alerta alerta--error" role="alert" id="error-caja"></p>
             <div class="columnas">
-                <lista-ordenes-pendientes titulo="Órdenes pendientes de pago"></lista-ordenes-pendientes>
-                <section class="panel tarjeta" aria-labelledby="titulo-panel" aria-live="polite" id="panel"></section>
+                 <lista-ordenes-pendientes con-estado titulo="Órdenes pendientes de pago"></lista-ordenes-pendientes>
+                 <section class="panel tarjeta" aria-labelledby="titulo-panel" aria-live="polite" id="panel"></section>
             </div>`;
 
         this.shadowRoot.addEventListener("cafefe:orden-seleccionada", evento => this.elegirOrden(evento.detail));
         this.shadowRoot.addEventListener("cafefe:pagos-cambiaron", () => this.actualizarBotonCobrar());
         this.shadowRoot.addEventListener("cafefe:nuevo-cobro", () => this.reiniciar());
+        this.shadowRoot.addEventListener("cafefe:orden-ya-no-pendiente", evento => this.ordenRetirada(evento.detail.idOrden));
         window.addEventListener("online", this.alCambiarConexion);
         window.addEventListener("offline", this.alCambiarConexion);
         this.mostrarSinSeleccion();
@@ -135,6 +138,8 @@ class PaginaPago extends HTMLElement {
                 <label for="cliente">Nombre del cliente en la factura</label>
                 <input id="cliente" maxlength="155" autocomplete="off" placeholder="Consumidor final" value="${escapar(cliente)}">
             </div>
+            ${seleccion.actualizada ? `<p class="alerta alerta--aviso" role="status">La orden cambió: se actualizaron sus productos y el total. Vuelva a ingresar los pagos.</p>` : ""}
+            <p class="alerta alerta--aviso" role="status" id="aviso-preparacion">${puedeCobrarse(seleccion.estado) ? "" : escapar(this.textoEsperando(seleccion.estado))}</p>
             <formulario-pago></formulario-pago>
             <p class="alerta alerta--error" role="alert" id="error-cobro"></p>
             <button type="button" class="boton boton--acento boton--bloque cobrar" id="cobrar" disabled>Cobrar</button>`;
@@ -158,10 +163,13 @@ class PaginaPago extends HTMLElement {
         }
         let resumen = formulario.resumen;
         let hayCaja = Boolean(this.shadowRoot.querySelector("#caja").value);
-        boton.disabled = !(resumen.total > 0 && resumen.saldo === 0 && hayCaja && this.enLinea);
+        let preparada = puedeCobrarse(this.seleccion?.estado);
+        boton.disabled = !(resumen.total > 0 && resumen.saldo === 0 && hayCaja && this.enLinea && preparada);
         boton.textContent = !this.enLinea
             ? "Sin conexión: no se puede cobrar"
-            : resumen.saldo > 0
+            : !preparada
+                ? "Esperando que el barista la prepare"
+                : resumen.saldo > 0
                 ? `Falta ${moneda(deCentavos(resumen.saldo))} por pagar`
                 : `Cobrar ${moneda(deCentavos(resumen.total))}`;
     }
@@ -176,6 +184,13 @@ class PaginaPago extends HTMLElement {
         boton.textContent = "Registrando el cobro…";
         let idCaja = raiz.querySelector("#caja").value;
         try {
+            // se vuelve a preguntar el estado: la lista pudo quedar desactualizada
+            let estado = (await this.ordenService.findEstado(this.seleccion.orden.idOrden)).datos.estado;
+            this.seleccion.estado = estado;
+            if (!puedeCobrarse(estado)) {
+                raiz.querySelector("#aviso-preparacion").textContent = this.textoEsperando(estado);
+                throw { mensaje: "Todavía no se puede cobrar: el barista no ha empezado a preparar esta orden." };
+            }
             let resultado = await this.cobro.cobrar(this.estado, {
                 cliente: raiz.querySelector("#cliente").value,
                 idCaja,
@@ -207,6 +222,22 @@ class PaginaPago extends HTMLElement {
         this.seleccion = null;
         this.estado = null;
         panel.querySelector("ticket-factura").shadowRoot.querySelector("#imprimir")?.focus();
+    }
+
+    textoEsperando(estado) {
+        return estado
+            ? "El barista todavía no ha empezado a preparar esta orden. Podrá cobrarla cuando esté en preparación."
+            : "No se pudo consultar si la orden ya se está preparando. Use Actualizar en la lista.";
+    }
+
+    /** La orden elegida ya no esta pendiente (por ejemplo, la cobro otra caja). */
+    ordenRetirada(idOrden) {
+        if (!this.seleccion || this.seleccion.orden.idOrden !== idOrden) {
+            return;
+        }
+        this.reiniciar();
+        this.shadowRoot.querySelector("#panel").insertAdjacentHTML("afterbegin",
+            `<p class="alerta alerta--aviso" role="status">La orden que tenía seleccionada ya no está pendiente de pago.</p>`);
     }
 
     reiniciar() {

@@ -57,4 +57,53 @@ suite("<lista-ordenes-pendientes>", function () {
         await esperar();
         chai.expect(lista.shadowRoot.querySelector("#error").textContent).to.contain("no hay conexión");
     });
+
+        test("con-estado deberia mostrar el estado de preparacion de cada orden", async function () {
+        ordenService.findEstado = sinon.stub();
+        ordenService.findEstado.withArgs("o1").resolves(respuesta({ estado: "RECIBIDA" }));
+        ordenService.findEstado.withArgs("o2").resolves(respuesta({ estado: "PREPARANDO" }));
+        let lista = montar("lista-ordenes-pendientes", { ordenService, ordenProductoService }, { "con-estado": "" });
+        await esperar();
+        let estados = [...lista.shadowRoot.querySelectorAll(".estado")].map(e => e.dataset.estado);
+        chai.expect(estados).to.deep.equal(["RECIBIDA", "PREPARANDO"]);
+    });
+
+        test("Actualizar deberia volver a avisar la orden elegida si le agregaron productos", async function () {
+        let lista = montar("lista-ordenes-pendientes", { ordenService, ordenProductoService });
+        await esperar();
+        lista.shadowRoot.querySelector('[data-id="o2"]').click();
+        let avisos = [];
+        lista.addEventListener("cafefe:orden-seleccionada", e => avisos.push(e.detail));
+        ordenProductoService.findByOrden.withArgs("o2").resolves(respuesta([
+            { idOrdenProducto: "c", precio: 2, observaciones: "" }, { idOrdenProducto: "d", precio: 3, observaciones: "" }]));
+        lista.shadowRoot.querySelector("#actualizar").click();
+        await esperar();
+        chai.expect(avisos).to.have.lengthOf(1);
+        chai.expect(avisos[0].actualizada).to.equal(true);
+        chai.expect(avisos[0].productos).to.have.lengthOf(2);
+        chai.expect(avisos[0].total).to.equal(500);
+    });
+
+    test("Actualizar sin cambios no deberia volver a avisar", async function () {
+        let lista = montar("lista-ordenes-pendientes", { ordenService, ordenProductoService });
+        await esperar();
+        lista.shadowRoot.querySelector('[data-id="o2"]').click();
+        let avisos = 0;
+        lista.addEventListener("cafefe:orden-seleccionada", () => { avisos++; });
+        lista.shadowRoot.querySelector("#actualizar").click();
+        await esperar();
+        chai.expect(avisos).to.equal(0);
+    });
+
+    test("si la orden elegida ya no esta pendiente deberia avisarlo", async function () {
+        let lista = montar("lista-ordenes-pendientes", { ordenService, ordenProductoService });
+        await esperar();
+        lista.shadowRoot.querySelector('[data-id="o1"]').click();
+        let retirada = null;
+        lista.addEventListener("cafefe:orden-ya-no-pendiente", e => { retirada = e.detail.idOrden; });
+        ordenService.findPendientes.resolves(respuesta([ORDENES[1]]));
+        lista.shadowRoot.querySelector("#actualizar").click();
+        await esperar();
+        chai.expect(retirada).to.equal("o1");
+    });
 });

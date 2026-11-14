@@ -9,8 +9,7 @@ const PRODUCTOS = [
     { idOrdenProducto: "op1", precio: 3.5, observaciones: "Cliente: Ana", idProducto: { nombre: "Cafe Americano" } },
     { idOrdenProducto: "op2", precio: 5, observaciones: "", idProducto: { nombre: "Caffe Latte" } }
 ];
-const SELECCION = { orden: { idOrden: "o1" }, productos: PRODUCTOS, total: 850, cliente: "Ana" };
-const ESTADO_NUEVO = { porFacturar: PRODUCTOS, enFactura: [], yaPagados: [], factura: null, pago: null, detallesPrevios: [], total: 850, yaPagado: 0 };
+const SELECCION = { orden: { idOrden: "o1" }, productos: PRODUCTOS, total: 850, cliente: "Ana", estado: "PREPARANDO" };const ESTADO_NUEVO = { porFacturar: PRODUCTOS, enFactura: [], yaPagados: [], factura: null, pago: null, detallesPrevios: [], total: 850, yaPagado: 0 };
 
 function sesionCajero() {
     let s = new Sesion(null, new EventTarget());
@@ -18,11 +17,9 @@ function sesionCajero() {
     return s;
 }
 
-/** Simula que el cajero eligio la orden en la lista. */
-function elegir(pagina) {
+function elegir(pagina, cambios = {}) {
     let lista = pagina.shadowRoot.querySelector("lista-ordenes-pendientes");
-    lista.dispatchEvent(new CustomEvent("cafefe:orden-seleccionada", { detail: SELECCION, bubbles: true, composed: true }));
-}
+    lista.dispatchEvent(new CustomEvent("cafefe:orden-seleccionada", { detail: { ...SELECCION, ...cambios }, bubbles: true, composed: true }));}
 
 function pagarEnEfectivo(pagina, monto) {
     let formulario = pagina.shadowRoot.querySelector("formulario-pago");
@@ -31,13 +28,14 @@ function pagarEnEfectivo(pagina, monto) {
 }
 
 suite("<pagina-pago> (HU4)", function () {
-    let cobro, cajaService, stubFetch;
+    let cobro, cajaService, ordenService, stubFetch;
 
     setup(function () {
         // la lista interna pide las ordenes pendientes: se responde vacio
         stubFetch = sinon.stub(window, "fetch").callsFake(() => Promise.resolve(new Response("[]", { status: 200 })));
         cajaService = { findRange: sinon.stub().resolves(respuesta([{ idCaja: "c1", nombre: "caja1", activo: true }])) };
         cobro = { cargarOrden: sinon.stub().resolves(ESTADO_NUEVO), cobrar: sinon.stub() };
+        ordenService = { findEstado: sinon.stub().resolves(respuesta({ idOrden: "o1", estado: "PREPARANDO" })) };
     });
 
     teardown(function () {
@@ -46,8 +44,7 @@ suite("<pagina-pago> (HU4)", function () {
     });
 
     function montarPagina() {
-        return montar("pagina-pago", { sesion: sesionCajero(), cajaService, cobro });
-    }
+        return montar("pagina-pago", { sesion: sesionCajero(), cajaService, ordenService, cobro });    }
 
     test("deberia saludar al cajero y cargar las cajas activas", async function () {
         let pagina = montarPagina();
@@ -136,4 +133,58 @@ suite("<pagina-pago> (HU4)", function () {
         await esperar();
         chai.expect(pagina.shadowRoot.querySelector("#panel").textContent).to.contain("ya tenía una factura pendiente");
     });
+
+
+    test("una orden que el barista no ha empezado a preparar no deberia poder cobrarse", async function () {
+        let pagina = montarPagina();
+        await esperar();
+        elegir(pagina, { estado: "RECIBIDA" });
+        await esperar();
+        pagarEnEfectivo(pagina, "10");
+        let raiz = pagina.shadowRoot;
+        chai.expect(raiz.querySelector("#aviso-preparacion").textContent).to.contain("todavía no ha empezado");
+        chai.expect(raiz.querySelector("#cobrar").disabled).to.equal(true);
+        chai.expect(raiz.querySelector("#cobrar").textContent).to.contain("Esperando");
+    });
+
+    test("al cobrar deberia volver a revisar el estado y no cobrar si la orden no esta en preparacion", async function () {
+        ordenService.findEstado.resolves(respuesta({ idOrden: "o1", estado: "RECIBIDA" }));
+        let pagina = montarPagina();
+        await esperar();
+        elegir(pagina);          // la lista decia PREPARANDO, pero el backend ya dice RECIBIDA
+        await esperar();
+        pagarEnEfectivo(pagina, "10");
+        pagina.shadowRoot.querySelector("#cobrar").click();
+        await esperar();
+        chai.expect(cobro.cobrar.called).to.equal(false);
+        chai.expect(pagina.shadowRoot.querySelector("#error-cobro").textContent).to.contain("Todavía no se puede cobrar");
+        chai.expect(pagina.shadowRoot.querySelector("#cobrar").disabled).to.equal(true);
+    });
+
+    test("si la orden cambio al actualizar la lista deberia mostrar sus productos nuevos y avisar", async function () {
+        let pagina = montarPagina();
+        await esperar();
+        elegir(pagina);
+        await esperar();
+        let extra = { idOrdenProducto: "op3", precio: 2, observaciones: "", idProducto: { nombre: "Croissant" } };
+        cobro.cargarOrden.resolves({ ...ESTADO_NUEVO, porFacturar: [...PRODUCTOS, extra], total: 1050 });
+        elegir(pagina, { productos: [...PRODUCTOS, extra], total: 1050, actualizada: true });
+        await esperar();
+        let raiz = pagina.shadowRoot;
+        chai.expect(raiz.querySelector("detalle-orden").shadowRoot.textContent).to.contain("Croissant").and.contain("$10.50");
+        chai.expect(raiz.querySelector("#panel").textContent).to.contain("La orden cambió");
+    });
+
+    test("si la orden elegida ya no esta pendiente deberia quitarla del panel", async function () {
+        let pagina = montarPagina();
+        await esperar();
+        elegir(pagina);
+        await esperar();
+        pagina.shadowRoot.querySelector("lista-ordenes-pendientes").dispatchEvent(
+            new CustomEvent("cafefe:orden-ya-no-pendiente", { detail: { idOrden: "o1" }, bubbles: true, composed: true }));
+        let panel = pagina.shadowRoot.querySelector("#panel");
+        chai.expect(panel.querySelector("formulario-pago")).to.equal(null);
+        chai.expect(panel.textContent).to.contain("ya no está pendiente");
+    });
+
 });

@@ -4,11 +4,21 @@ import PagoService from "./pago_service.js";
 import PagoDetalleService from "./pago_detalle_service.js";
 import DefaultError from "../entity/default_error.js";
 import { leerCliente } from "./texto.js";
+import { ESTADOS } from "./recepcion.js";
 
 /** Formas de pago que acepta el backend (PagoDetalleDAO.TIPOS_PAGO). */
 export const TIPOS_PAGO = ["EFECTIVO", "TARJETA", "TRANSFERENCIA"];
 export const EFECTIVO = "EFECTIVO";
 
+/**
+ * Una orden solo se puede cobrar cuando el barista/cocinero ya la empezo a preparar
+ * Si se quiere exigir que este lista, se quita PREPARANDO de esta lista.
+ */
+export const ESTADOS_PARA_COBRAR = [ESTADOS.PREPARANDO, ESTADOS.EN_CAMINO, ESTADOS.ENTREGADA];
+
+export function puedeCobrarse(estadoPreparacion) {
+    return ESTADOS_PARA_COBRAR.includes(estadoPreparacion);
+}
 const PENDIENTE = "PENDIENTE";
 const COMPLETADO = "COMPLETADO";
 const ANULADO = "ANULADO";
