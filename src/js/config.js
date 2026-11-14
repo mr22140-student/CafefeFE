@@ -3,7 +3,7 @@
  * Si cambia el puerto o el nombre del .war, solo se cambia aqui.
  * Es la misma URL que usan para ver el JSON en el navegador (sin el recurso final).
  */
-export const URL_API = "http://localhost:9080/CafefeSV-1.0-SNAPSHOT/resources/v1/";
+export const URL_API = `http://${location.hostname}:9080/CafefeSV-1.0-SNAPSHOT/resources/v1/`;
 
 /** Nombres de rol tal como estan en la tabla rol (se comparan sin tildes ni mayusculas). */
 export const ROLES = {
