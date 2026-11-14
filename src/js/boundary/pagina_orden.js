@@ -1,6 +1,7 @@
 import { ESTILOS } from "./estilos.js";
 import { TipoProductoServiceConCopia, ProductoTipoProductoServiceConCopia, textoFechaCopia } from "../control/menu_local.js";
 import OrdenCliente from "../control/orden_cliente.js";
+import { cola } from "../control/cola_ordenes.js";
 import { escapar, moneda, normalizar } from "../control/texto.js";import OrdenService from "../control/orden_service.js";
 import "./tarjeta_simple.js";
 import "./lista_productos.js";
@@ -36,6 +37,7 @@ class PaginaOrden extends HTMLElement {
         this.tipoProductoService = new TipoProductoServiceConCopia();
         this.productoTipoProductoService = new ProductoTipoProductoServiceConCopia();
         this.ordenCliente = new OrdenCliente();
+        this.cola = cola;
         this.ordenService = new OrdenService();
         this.categorias = [];
         this.seleccionada = null;
@@ -174,9 +176,14 @@ class PaginaOrden extends HTMLElement {
             carrito.vaciar();
             this.dispatchEvent(new CustomEvent("cafefe:orden-creada", { detail: resultado, bubbles: true, composed: true }));
         } catch (e) {
-            carrito.mostrarError(e.estado === 0
-                ? "No se pudo enviar la orden: no hay conexión con el servidor."
-                : (e.mensaje || "No se pudo crear la orden."));
+            if (e.estado === 0) {
+                // sin conexion: la orden se guarda y se envia sola al volver la conexion
+                this.cola.agregar(cliente, items);
+                this.mostrarConfirmacionEnCola(cliente, total);
+                carrito.vaciar();
+            } else {
+                carrito.mostrarError(e.mensaje || "No se pudo crear la orden.");
+            }
         } finally {
             carrito.ocupado = false;
         }
@@ -195,6 +202,19 @@ class PaginaOrden extends HTMLElement {
         seguimiento.ordenService = this.ordenService;
         seguimiento.setAttribute("orden", orden.idOrden);
         confirmacion.querySelector(".numero").after(seguimiento);
+        confirmacion.querySelector("#otra").addEventListener("click", () => this.nuevaOrden());
+        this.shadowRoot.querySelector("#armar").hidden = true;
+        confirmacion.hidden = false;
+        confirmacion.focus();
+    }
+     mostrarConfirmacionEnCola(cliente, total) {
+        let confirmacion = this.shadowRoot.querySelector("#confirmacion");
+        confirmacion.innerHTML = `
+            <h2>¡Gracias, ${escapar(cliente)}!</h2>
+            <p class="alerta alerta--aviso" role="status">No hay conexión en este momento. Su orden quedó guardada en este
+               dispositivo y se enviará sola en cuanto vuelva la conexión.</p>
+            <p>Total a pagar en caja: <strong>${moneda(total)}</strong></p>
+            <button type="button" class="boton" id="otra">Hacer otra orden</button>`;
         confirmacion.querySelector("#otra").addEventListener("click", () => this.nuevaOrden());
         this.shadowRoot.querySelector("#armar").hidden = true;
         confirmacion.hidden = false;

@@ -159,16 +159,36 @@ suite("<pagina-orden> crear la orden", function () {
         chai.expect(pagina.shadowRoot.querySelector("#armar").hidden).to.equal(false);
     });
 
-    test("si falla la creacion deberia mostrar el error en el carrito y no perder la orden", async function () {
+    test("sin conexion deberia guardar la orden en la cola, avisar y vaciar el carrito", async function () {
         let error = new DefaultError();
         error.estado = 0;
         ordenCliente.crear.rejects(error);
-        let pagina = montar("pagina-orden", { tipoProductoService, ordenCliente, ordenService });
+        let cola = { agregar: sinon.spy() };
+        let pagina = montar("pagina-orden", { tipoProductoService, ordenCliente, ordenService, cola });
         await esperar();
         let carrito = prepararCarrito(pagina);
         carrito.shadowRoot.querySelector("#formulario").requestSubmit();
         await esperar();
-        chai.expect(carrito.shadowRoot.querySelector("#error").textContent).to.contain("no hay conexión");
+        chai.expect(cola.agregar.calledOnceWith("Marta", [{ producto: AMERICANO, cantidad: 2 }])).to.equal(true);
+        let confirmacion = pagina.shadowRoot.querySelector("#confirmacion");
+        chai.expect(confirmacion.hidden).to.equal(false);
+        chai.expect(confirmacion.textContent).to.contain("se enviará sola");
+        chai.expect(carrito.items).to.have.lengthOf(0);
+    });
+
+    test("si el servidor rechaza la orden deberia mostrar el error y no perder la orden", async function () {
+        let error = new DefaultError();
+        error.estado = 422;
+        error.mensaje = "El producto ya no está disponible";
+        ordenCliente.crear.rejects(error);
+        let cola = { agregar: sinon.spy() };
+        let pagina = montar("pagina-orden", { tipoProductoService, ordenCliente, ordenService, cola });
+        await esperar();
+        let carrito = prepararCarrito(pagina);
+        carrito.shadowRoot.querySelector("#formulario").requestSubmit();
+        await esperar();
+        chai.expect(cola.agregar.called).to.equal(false);
+        chai.expect(carrito.shadowRoot.querySelector("#error").textContent).to.contain("ya no está disponible");
         chai.expect(carrito.items).to.have.lengthOf(1);
         chai.expect(carrito.ocupado).to.equal(false);
         chai.expect(pagina.shadowRoot.querySelector("#confirmacion").hidden).to.equal(true);
