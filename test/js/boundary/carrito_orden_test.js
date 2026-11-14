@@ -70,6 +70,17 @@ suite("<carrito-orden>", function () {
         chai.expect(confirmada).to.equal(false);
         chai.expect(carrito.shadowRoot.querySelector("#cliente").getAttribute("aria-invalid")).to.equal("true");
     });
+        test("no deberia confirmar si el nombre tiene numeros", function () {
+        let carrito = montar("carrito-orden");
+        let confirmada = false;
+        carrito.addEventListener("cafefe:confirmar-orden", () => { confirmada = true; });
+        carrito.agregar(AMERICANO);
+        escribirCliente(carrito, "12345");
+        enviar(carrito);
+        chai.expect(confirmada).to.equal(false);
+        chai.expect(carrito.shadowRoot.querySelector("#cliente").getAttribute("aria-invalid")).to.equal("true");
+        chai.expect(carrito.shadowRoot.querySelector("#error").textContent).to.contain("solo con letras");
+    });
 
     test("al confirmar deberia avisar con el cliente y los productos", function () {
         let carrito = montar("carrito-orden");

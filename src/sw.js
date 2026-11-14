@@ -12,7 +12,7 @@
  *   - browser-sync (/browser-sync/...)
  *
  */
-const VERSION = "cafefe-v8";
+const VERSION = "cafefe-v9";
 
 const ARCHIVOS = [
     "./",
@@ -32,6 +32,7 @@ const ARCHIVOS = [
     "js/boundary/carrito_orden.js",
     "js/boundary/pagina_pago.js",
     "js/boundary/pagina_recepcion.js",
+    "js/boundary/seguimiento_orden.js",
     "js/boundary/tarjeta_simple.js",
     "js/boundary/ticket_factura.js",
     "js/config.js",

@@ -1,13 +1,26 @@
 /**
- * Reglas de la recepcion de ordenes.
- * El estado de preparacion (NUEVA -> PREPARANDO -> LISTA) es solo visual: el backend no lo guarda, la orden sigue pendiente hasta que se paga.
+ * Reglas de la preparacion de ordenes en el local (HU3 y seguimiento del cliente).
+ * El estado se guarda en el backend (GET/PUT orden/{id}/estado, en memoria):
+ * el barista lo avanza desde <pagina-recepcion> y el cliente lo ve en <seguimiento-orden>.
  */
-export const ESTADOS = { NUEVA: "NUEVA", PREPARANDO: "PREPARANDO", LISTA: "LISTA" };
+export const ESTADOS = { RECIBIDA: "RECIBIDA", PREPARANDO: "PREPARANDO", EN_CAMINO: "EN_CAMINO", ENTREGADA: "ENTREGADA" };
+
+/** Los pasos en el orden en que avanza la orden (igual que OrdenDAO.ESTADOS_PREPARACION). */
+export const PASOS = [ESTADOS.RECIBIDA, ESTADOS.PREPARANDO, ESTADOS.EN_CAMINO, ESTADOS.ENTREGADA];
 
 export const TEXTO_ESTADO = {
-    NUEVA: "Nueva",
+    RECIBIDA: "Recibida",
     PREPARANDO: "En preparación",
-    LISTA: "Lista para entregar"
+    EN_CAMINO: "En camino",
+    ENTREGADA: "Entregada"
+};
+
+/** Lo que lee el cliente en su seguimiento. */
+export const MENSAJE_CLIENTE = {
+    RECIBIDA: "Recibimos su orden. En un momento empezamos a prepararla.",
+    PREPARANDO: "Estamos preparando su orden.",
+    EN_CAMINO: "Su orden va en camino a su mesa.",
+    ENTREGADA: "¡Buen provecho! Su orden fue entregada."
 };
 
 /** Junta las unidades iguales: [{ nombre, cantidad }] en el orden en que llegaron. */
@@ -23,10 +36,8 @@ export function agruparProductos(productos) {
     return [...grupos.values()];
 }
 
-/** NUEVA -> PREPARANDO -> LISTA (LISTA ya no avanza). */
+/** RECIBIDA -> PREPARANDO -> EN_CAMINO -> ENTREGADA (ENTREGADA ya no avanza). */
 export function siguienteEstado(estado) {
-    if (estado === ESTADOS.PREPARANDO || estado === ESTADOS.LISTA) {
-        return ESTADOS.LISTA;
-    }
-    return ESTADOS.PREPARANDO;
+    let actual = Math.max(PASOS.indexOf(estado), 0);
+    return PASOS[Math.min(actual + 1, PASOS.length - 1)];
 }

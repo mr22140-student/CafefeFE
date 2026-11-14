@@ -54,6 +54,12 @@ suite("OrdenCliente", function () {
         chai.expect(ordenService.create.called).to.equal(false);
     });
 
+        test("con numeros en el nombre no deberia crear nada", async function () {
+        let err = await esperarRechazo(ordenCliente.crear("Marta 2", [{ producto: AMERICANO, cantidad: 1 }]));
+        chai.expect(err.mensaje).to.contain("solo con letras");
+        chai.expect(ordenService.create.called).to.equal(false);
+    });
+
     test("sin productos no deberia crear nada", async function () {
         let err = await esperarRechazo(ordenCliente.crear("Marta", []));
         chai.expect(err.mensaje).to.contain("al menos un producto");
