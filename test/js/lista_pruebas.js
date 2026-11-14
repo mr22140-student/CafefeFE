@@ -10,6 +10,7 @@ export const UNITARIAS = [
     "control/mesero_virtual_test",
     "control/almacen_local_test",
     "control/menu_local_test",
+    "control/cola_ordenes_test",
     "control/orden_cliente_test",
     "control/cobro_test",
     "control/recepcion_test",
