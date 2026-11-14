@@ -57,6 +57,7 @@ const ARCHIVOS = [
     "js/control/producto_caracteristica_service.js",
     "js/control/producto_service.js",
     "js/control/producto_tipo_producto_service.js",
+    "js/control/recepcion.js",
     "js/control/rol_service.js",
     "js/control/router.js",
     "js/control/sesion.js",
@@ -73,12 +74,7 @@ const ARCHIVOS = [
     "recursos/iconos/icono-192.png",
     "recursos/iconos/icono-512.png",
     "recursos/iconos/icono-maskable-512.png",
-    "recursos/imagenes/tipo_producto/default.png",
-    "recursos/imagenes/tipo_producto/8e7dd2b5-5beb-4ccf-81bb-e0395e0b2b8f.png",
-    "recursos/imagenes/tipo_producto/05865a67-37b0-42d1-8616-acdd20ed92f5.png",
-    "recursos/imagenes/tipo_producto/ed5ff19d-f8e7-4eae-a2ce-9ae59940ad57.png",
-    "recursos/imagenes/tipo_producto/16e88bee-c13b-4b1b-a0ca-26cddc92252b.png",
-    "recursos/imagenes/tipo_producto/0718e8de-8de4-4540-ac57-d011e7ab1310.png"
+    "recursos/imagenes/tipo_producto/default.png"
 ];
 
 self.addEventListener("install", evento => {

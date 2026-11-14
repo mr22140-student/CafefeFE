@@ -2,14 +2,24 @@ import { ESTILOS } from "./estilos.js";
 import TipoProductoService from "../control/tipo_producto_service.js";
 import ProductoTipoProductoService from "../control/producto_tipo_producto_service.js";
 import OrdenCliente from "../control/orden_cliente.js";
-import { escapar, moneda } from "../control/texto.js";
-import OrdenService from "../control/orden_service.js";
+import { escapar, moneda, normalizar } from "../control/texto.js";import OrdenService from "../control/orden_service.js";
 import "./tarjeta_simple.js";
 import "./lista_productos.js";
 import "./carrito_orden.js";
 import "./seguimiento_orden.js";
 
-const IMAGEN_POR_DEFECTO = "recursos/imagenes/tipo_producto/default.png";
+const CARPETA_IMAGENES = "recursos/imagenes/tipo_producto/";
+const IMAGEN_POR_DEFECTO = CARPETA_IMAGENES + "default.png";
+
+/**
+ * Imagen de una categoria segun su NOMBRE 
+ * "Bebida caliente" -> recursos/imagenes/tipo_producto/bebida-caliente.png
+ * Para una categoria nueva solo hay que guardar su dibujo con ese nombre.
+ */
+export function imagenDeCategoria(nombre) {
+    let archivo = normalizar(nombre).replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+    return archivo ? CARPETA_IMAGENES + archivo + ".png" : IMAGEN_POR_DEFECTO;
+}
 
 /**
  * <pagina-orden>
@@ -113,8 +123,7 @@ class PaginaOrden extends HTMLElement {
                     ${c.activo ? "" : "disabled"} aria-pressed="${this.seleccionada === c.idTipoProducto}">
                 <tarjeta-simple ${c.activo ? "" : "inactiva"} ${this.seleccionada === c.idTipoProducto ? "seleccionada" : ""}>
                     <span slot="titulo">${escapar(c.nombre)}</span>
-                    <img slot="contenido" alt="" src="recursos/imagenes/tipo_producto/${escapar(c.idTipoProducto)}.png">
-                    <span slot="pie" class="estado">${c.activo ? "" : "No disponible"}</span>
+                    <img slot="contenido" alt="" src="${escapar(imagenDeCategoria(c.nombre))}">                    <span slot="pie" class="estado">${c.activo ? "" : "No disponible"}</span>
                 </tarjeta-simple>
             </button>`).join("");
 

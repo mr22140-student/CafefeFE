@@ -1,7 +1,6 @@
 import * as chai from "../lib/chai/index.js";
 import sinon from "../lib/sinon/sinon-esm.js";
-import "../../../src/js/boundary/pagina_orden.js";
-import DefaultError from "../../../src/js/entity/default_error.js";
+import { imagenDeCategoria } from "../../../src/js/boundary/pagina_orden.js";import DefaultError from "../../../src/js/entity/default_error.js";
 import { montar, limpiar, esperar, respuesta } from "./utilidades.js";
 
 const CATEGORIAS = [
@@ -172,5 +171,17 @@ suite("<pagina-orden> crear la orden", function () {
         chai.expect(carrito.items).to.have.lengthOf(1);
         chai.expect(carrito.ocupado).to.equal(false);
         chai.expect(pagina.shadowRoot.querySelector("#confirmacion").hidden).to.equal(true);
+    });
+});
+
+suite("<pagina-orden> imagen de cada categoria", function () {
+    test("deberia buscar la imagen por el nombre, sin tildes, mayusculas ni espacios", function () {
+        chai.expect(imagenDeCategoria("Bebida caliente")).to.equal("recursos/imagenes/tipo_producto/bebida-caliente.png");
+        chai.expect(imagenDeCategoria("  Cafés & Tés ")).to.equal("recursos/imagenes/tipo_producto/cafes-tes.png");
+    });
+
+    test("sin nombre deberia usar la imagen por defecto", function () {
+        chai.expect(imagenDeCategoria("")).to.equal("recursos/imagenes/tipo_producto/default.png");
+        chai.expect(imagenDeCategoria(null)).to.equal("recursos/imagenes/tipo_producto/default.png");
     });
 });
