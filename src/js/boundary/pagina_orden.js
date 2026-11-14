@@ -1,6 +1,5 @@
 import { ESTILOS } from "./estilos.js";
-import TipoProductoService from "../control/tipo_producto_service.js";
-import ProductoTipoProductoService from "../control/producto_tipo_producto_service.js";
+import { TipoProductoServiceConCopia, ProductoTipoProductoServiceConCopia, textoFechaCopia } from "../control/menu_local.js";
 import OrdenCliente from "../control/orden_cliente.js";
 import { escapar, moneda, normalizar } from "../control/texto.js";import OrdenService from "../control/orden_service.js";
 import "./tarjeta_simple.js";
@@ -27,14 +26,15 @@ export function imagenDeCategoria(nombre) {
 2. "cafefe:producto-agregado" (de <lista-productos>) suma el producto a <carrito-orden>.
 3. "cafefe:confirmar-orden" (de <carrito-orden>) crea la orden con el mesero virtual (OrdenCliente), muestra la confirmacion con <seguimiento-orden> (el estado en tiempo real) y dispara "cafefe:orden-creada".
 Imagen de cada categoria: recursos/imagenes/tipo_producto/{idTipoProducto}.png
-(si no existe, se usa default.png).
+(si no existe, usa default.png).
  */
 class PaginaOrden extends HTMLElement {
     constructor() {
         super();
         this.attachShadow({ mode: "open" });
-        this.tipoProductoService = new TipoProductoService();
-        this.productoTipoProductoService = new ProductoTipoProductoService();
+        // con copia local: sin conexion se muestra el ultimo menu que se vio
+        this.tipoProductoService = new TipoProductoServiceConCopia();
+        this.productoTipoProductoService = new ProductoTipoProductoServiceConCopia();
         this.ordenCliente = new OrdenCliente();
         this.ordenService = new OrdenService();
         this.categorias = [];
@@ -78,6 +78,7 @@ class PaginaOrden extends HTMLElement {
             </section>
             <div id="armar">
                 <p class="alerta alerta--error" role="alert" id="error"></p>
+                <p class="alerta alerta--aviso" role="status" id="aviso-copia"></p>
                 <section aria-label="Categorías" aria-busy="true" id="seccion-categorias">
                     <div class="rejilla" id="categorias"><p class="vacio">Cargando categorías…</p></div>
                 </section>
@@ -101,17 +102,33 @@ class PaginaOrden extends HTMLElement {
         try {
             let resp = await this.tipoProductoService.findRange(0, 100);
             this.categorias = resp.datos;
+            this.shadowRoot.querySelector("#aviso-copia").textContent = resp.desdeCopia
+                ? `Sin conexión: se muestra el menú guardado (${textoFechaCopia(resp.fechaCopia)}). Puede armar su orden igual.`
+                : "";
             this.dibujar();
+            if (!resp.desdeCopia) {
+                this.guardarMenuCompleto();
+            }
         } catch (e) {
             contenedor.innerHTML = "";
             this.shadowRoot.querySelector("#error").textContent = e.estado === 0
-                ? "No se pudieron cargar las categorías: no hay conexión con el servidor."
-                : (e.mensaje || "No se pudieron cargar las categorías.");
+            ? "No se pudieron cargar las categorías: no hay conexión y todavía no hay un menú guardado (ábralo una vez con conexión)."                : (e.mensaje || "No se pudieron cargar las categorías.");
         } finally {
             this.shadowRoot.querySelector("#seccion-categorias").setAttribute("aria-busy", "false");
         }
     }
 
+        /**
+     * Con conexion, pide en segundo plano los productos de todas las categorias activas
+     * para que queden en la copia local: asi, sin conexion, se puede ordenar de cualquier
+     * categoria aunque el cliente no la haya abierto antes. Los errores se ignoran.
+     */
+    guardarMenuCompleto() {
+        return Promise.all(this.categorias
+            .filter(c => c.activo)
+            .map(c => this.productoTipoProductoService.findByTipoProducto(c.idTipoProducto).catch(() => null)));
+    }
+    
     dibujar() {
         let contenedor = this.shadowRoot.querySelector("#categorias");
         if (this.categorias.length === 0) {

@@ -67,7 +67,8 @@ suite("<pagina-orden> categorias", function () {
         pagina.shadowRoot.querySelector('[data-id="t1"]').click();
         await esperar();
         chai.expect(pagina.shadowRoot.querySelector("lista-productos").getAttribute("categoria")).to.equal("t1");
-        chai.expect(productoTipoProductoService.findByTipoProducto.calledOnceWith("t1")).to.equal(true);
+        // se llama dos veces: una para guardar el menu completo y otra al elegir la categoria
+        chai.expect(productoTipoProductoService.findByTipoProducto.calledWith("t1")).to.equal(true);
     });
 });
 
@@ -183,5 +184,34 @@ suite("<pagina-orden> imagen de cada categoria", function () {
     test("sin nombre deberia usar la imagen por defecto", function () {
         chai.expect(imagenDeCategoria("")).to.equal("recursos/imagenes/tipo_producto/default.png");
         chai.expect(imagenDeCategoria(null)).to.equal("recursos/imagenes/tipo_producto/default.png");
+    });
+});
+
+
+suite("<pagina-orden> menu sin conexion", function () {
+    teardown(limpiar);
+
+    test("si las categorias vienen de la copia guardada deberia avisarlo y mostrarlas", async function () {
+        let copia = respuesta([{ idTipoProducto: "t1", nombre: "Cafés", activo: true }]);
+        copia.desdeCopia = true;
+        copia.fechaCopia = "2026-11-14T15:30:00.000Z";
+        let tipoProductoService = { findRange: sinon.stub().resolves(copia) };
+        let productoTipoProductoService = { findByTipoProducto: sinon.stub().resolves(respuesta([])) };
+        let pagina = montar("pagina-orden", { tipoProductoService, productoTipoProductoService });
+        await esperar();
+        chai.expect(pagina.shadowRoot.querySelector("#aviso-copia").textContent).to.contain("menú guardado");
+        chai.expect(pagina.shadowRoot.querySelectorAll(".categoria")).to.have.lengthOf(1);
+        chai.expect(productoTipoProductoService.findByTipoProducto.called).to.equal(false);
+    });
+
+    test("con conexion deberia guardar en segundo plano los productos de las categorias activas", async function () {
+        let tipoProductoService = { findRange: sinon.stub().resolves(respuesta([
+            { idTipoProducto: "t1", nombre: "Cafés", activo: true },
+            { idTipoProducto: "t2", nombre: "Merch", activo: false }])) };
+        let productoTipoProductoService = { findByTipoProducto: sinon.stub().resolves(respuesta([])) };
+        let pagina = montar("pagina-orden", { tipoProductoService, productoTipoProductoService });
+        await esperar();
+        chai.expect(pagina.shadowRoot.querySelector("#aviso-copia").textContent).to.equal("");
+        chai.expect(productoTipoProductoService.findByTipoProducto.calledOnceWith("t1")).to.equal(true);
     });
 });

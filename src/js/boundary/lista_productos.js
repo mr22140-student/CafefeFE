@@ -59,8 +59,7 @@ class ListaProductos extends HTMLElement {
         } catch (e) {
             contenedor.innerHTML = "";
             this.shadowRoot.querySelector("#error").textContent = e.estado === 0
-                ? "No se pudieron cargar los productos: no hay conexión con el servidor."
-                : (e.mensaje || "No se pudieron cargar los productos.");
+                ? "No se pudieron cargar los productos: no hay conexión y esta categoría no está en el menú guardado."                : (e.mensaje || "No se pudieron cargar los productos.");
         } finally {
             seccion.setAttribute("aria-busy", "false");
         }
