@@ -42,6 +42,7 @@ export const UNITARIAS = [
     "boundary/ticket_factura_test",
     "boundary/pagina_pago_test",
     "boundary/pagina_recepcion_test",
+    "boundary/seguimiento_orden_test",
     "boundary/cafefe_app_test"
 ];
 

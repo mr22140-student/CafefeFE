@@ -20,12 +20,17 @@ suite("recepcion: agruparProductos", function () {
 });
 
 suite("recepcion: siguienteEstado", function () {
-    test("deberia avanzar de nueva a preparando y de preparando a lista", function () {
-        chai.expect(siguienteEstado(ESTADOS.NUEVA)).to.equal(ESTADOS.PREPARANDO);
-        chai.expect(siguienteEstado(ESTADOS.PREPARANDO)).to.equal(ESTADOS.LISTA);
+    test("deberia avanzar recibida, preparando, en camino y entregada", function () {
+        chai.expect(siguienteEstado(ESTADOS.RECIBIDA)).to.equal(ESTADOS.PREPARANDO);
+        chai.expect(siguienteEstado(ESTADOS.PREPARANDO)).to.equal(ESTADOS.EN_CAMINO);
+        chai.expect(siguienteEstado(ESTADOS.EN_CAMINO)).to.equal(ESTADOS.ENTREGADA);
     });
 
-    test("una orden lista deberia quedarse lista", function () {
-        chai.expect(siguienteEstado(ESTADOS.LISTA)).to.equal(ESTADOS.LISTA);
+    test("una orden entregada deberia quedarse entregada", function () {
+        chai.expect(siguienteEstado(ESTADOS.ENTREGADA)).to.equal(ESTADOS.ENTREGADA);
+    });
+
+    test("un estado desconocido deberia tratarse como recibida", function () {
+        chai.expect(siguienteEstado(undefined)).to.equal(ESTADOS.PREPARANDO);
     });
 });

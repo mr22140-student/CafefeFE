@@ -1,5 +1,5 @@
 import { ESTILOS } from "./estilos.js";
-import { escapar, moneda } from "../control/texto.js";
+import { escapar, moneda, esNombreValido, NOMBRE_INVALIDO } from "../control/texto.js";
 
 /**
  * <carrito-orden>
@@ -140,6 +140,12 @@ class CarritoOrden extends HTMLElement {
         if (!cliente) {
             entrada.setAttribute("aria-invalid", "true");
             this.mostrarError("Escriba su nombre para que le podamos llamar.");
+            entrada.focus();
+            return;
+        }
+        if (!esNombreValido(cliente)) {
+            entrada.setAttribute("aria-invalid", "true");
+            this.mostrarError(NOMBRE_INVALIDO);
             entrada.focus();
             return;
         }

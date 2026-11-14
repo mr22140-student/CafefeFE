@@ -2,7 +2,7 @@ import OrdenService from "./orden_service.js";
 import OrdenProductoService from "./orden_producto_service.js";
 import MeseroVirtual from "./mesero_virtual.js";
 import DefaultError from "../entity/default_error.js";
-import { marcarCliente } from "./texto.js";
+import { marcarCliente, esNombreValido, NOMBRE_INVALIDO} from "./texto.js";
 
 /**
 Crea la orden que el cliente arma en la app 
@@ -26,6 +26,9 @@ class OrdenCliente {
         let nombre = (cliente || "").trim();
         if (!nombre) {
             throw this.error("Escriba su nombre para que le podamos llamar.");
+        }
+        if (!esNombreValido(nombre)) {
+            throw this.error(NOMBRE_INVALIDO);
         }
         if (!items || items.length === 0 || items.some(i => !(i.cantidad >= 1))) {
             throw this.error("Agregue al menos un producto a su orden.");

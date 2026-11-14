@@ -3,20 +3,21 @@ import TipoProductoService from "../control/tipo_producto_service.js";
 import ProductoTipoProductoService from "../control/producto_tipo_producto_service.js";
 import OrdenCliente from "../control/orden_cliente.js";
 import { escapar, moneda } from "../control/texto.js";
+import OrdenService from "../control/orden_service.js";
 import "./tarjeta_simple.js";
 import "./lista_productos.js";
 import "./carrito_orden.js";
+import "./seguimiento_orden.js";
 
-/**Imagen de cada categoria: recursos/imagenes/tipo_producto/{idTipoProducto}.png (si no existe, se usa default.png).
+const IMAGEN_POR_DEFECTO = "recursos/imagenes/tipo_producto/default.png";
 
 /**
  * <pagina-orden>
 1. Muestra las categorias (tipo_producto) con su imagen; las inactivas se ven atenuadas y no se pueden elegir. Al elegir una dispara "cafefe:categoria-seleccionada" y <lista-productos> muestra sus productos.
 2. "cafefe:producto-agregado" (de <lista-productos>) suma el producto a <carrito-orden>.
-3. "cafefe:confirmar-orden" (de <carrito-orden>) crea la orden con el mesero
-    virtual (OrdenCliente), muestra la confirmacion y dispara "cafefe:orden-creada".
-Imagen de cada categoria: recursos/imagenes/tipo_producto/{idTipoProducto}.svg
-(si no existe, se usa default.svg).
+3. "cafefe:confirmar-orden" (de <carrito-orden>) crea la orden con el mesero virtual (OrdenCliente), muestra la confirmacion con <seguimiento-orden> (el estado en tiempo real) y dispara "cafefe:orden-creada".
+Imagen de cada categoria: recursos/imagenes/tipo_producto/{idTipoProducto}.png
+(si no existe, se usa default.png).
  */
 class PaginaOrden extends HTMLElement {
     constructor() {
@@ -25,6 +26,7 @@ class PaginaOrden extends HTMLElement {
         this.tipoProductoService = new TipoProductoService();
         this.productoTipoProductoService = new ProductoTipoProductoService();
         this.ordenCliente = new OrdenCliente();
+        this.ordenService = new OrdenService();
         this.categorias = [];
         this.seleccionada = null;
     }
@@ -162,6 +164,11 @@ class PaginaOrden extends HTMLElement {
             <p class="numero">Orden #${escapar(String(orden.idOrden).slice(0, 8).toUpperCase())}</p>
             <p>Total a pagar en caja: <strong>${moneda(total)}</strong></p>
             <button type="button" class="boton" id="otra">Hacer otra orden</button>`;
+        // el seguimiento en tiempo real va antes del total
+        let seguimiento = document.createElement("seguimiento-orden");
+        seguimiento.ordenService = this.ordenService;
+        seguimiento.setAttribute("orden", orden.idOrden);
+        confirmacion.querySelector(".numero").after(seguimiento);
         confirmacion.querySelector("#otra").addEventListener("click", () => this.nuevaOrden());
         this.shadowRoot.querySelector("#armar").hidden = true;
         confirmacion.hidden = false;
@@ -169,7 +176,9 @@ class PaginaOrden extends HTMLElement {
     }
 
     nuevaOrden() {
-        this.shadowRoot.querySelector("#confirmacion").hidden = true;
+        let confirmacion = this.shadowRoot.querySelector("#confirmacion");
+        confirmacion.hidden = true;
+        confirmacion.innerHTML = "";   // quita <seguimiento-orden> y deja de consultar
         this.shadowRoot.querySelector("#armar").hidden = false;
         this.shadowRoot.querySelector(".categoria:not(:disabled)")?.focus();
     }

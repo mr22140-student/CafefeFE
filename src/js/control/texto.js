@@ -28,6 +28,16 @@ export function escapar(texto) {
 
 const PATRON_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+/**
+ * Nombre de una persona: empieza con letra y solo lleva letras (con tildes o ñ), espacios, punto, apostrofo o guion. Sin numeros ni simbolos: "María José", "O'Neil".
+ */
+const PATRON_NOMBRE = /^\p{L}[\p{L} .'-]*$/u;
+export const NOMBRE_INVALIDO = "Escriba su nombre solo con letras, sin números ni símbolos.";
+
+export function esNombreValido(texto) {
+    return PATRON_NOMBRE.test((texto ?? "").toString().trim());
+}
+
 /** true si el texto tiene forma de UUID (los ids del backend). */
 export function esUuid(texto) {
     return PATRON_UUID.test((texto ?? "").toString().trim());
