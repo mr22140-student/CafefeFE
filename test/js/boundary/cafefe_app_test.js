@@ -8,16 +8,41 @@ function paginaActual(app) {
     return app.shadowRoot.querySelector("main").firstElementChild.localName;
 }
 
+/**
+ * Las pruebas y la app comparten localhost:3000, y con eso el mismo localStorage.
+ * Aqui se monta la app de verdad (con fetch simulado que responde vacio), asi que
+ * guardaria un menu vacio y cerraria la sesion real. Por eso se copia todo lo de
+ * Cafefe ("cafefe.*") antes de las pruebas y se regresa igual al terminar.
+ */
+function copiarAlmacenCafefe() {
+    let copia = {};
+    for (let i = 0; i < localStorage.length; i++) {
+        let clave = localStorage.key(i);
+        if (clave.startsWith("cafefe.")) {
+            copia[clave] = localStorage.getItem(clave);
+        }
+    }
+    return copia;
+}
+
+function regresarAlmacenCafefe(copia) {
+    Object.keys(copiarAlmacenCafefe()).forEach(clave => localStorage.removeItem(clave));
+    Object.entries(copia).forEach(([clave, valor]) => localStorage.setItem(clave, valor));
+}
+
 suite("<cafefe-app> navegacion SPA", function () {
     let stubFetch;
     let tituloOriginal;
+    let almacenOriginal;
 
     suiteSetup(function () {
         tituloOriginal = document.title;
+        almacenOriginal = copiarAlmacenCafefe();
     });
 
     suiteTeardown(function () {
         document.title = tituloOriginal;
+        regresarAlmacenCafefe(almacenOriginal);
     });
 
     setup(function () {
