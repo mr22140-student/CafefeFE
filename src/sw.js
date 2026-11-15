@@ -12,7 +12,7 @@
  *   - browser-sync (/browser-sync/...)
  *
  */
-const VERSION = "cafefe-v10";
+const VERSION = "cafefe-v11";
 
 const ARCHIVOS = [
     "./",
@@ -36,7 +36,7 @@ const ARCHIVOS = [
     "js/boundary/tarjeta_simple.js",
     "js/boundary/ticket_factura.js",
     "js/config.js",
-     "js/control/almacen_local.js",
+    "js/control/almacen_local.js",
     "js/control/autenticacion.js",
     "js/control/caja_service.js",
     "js/control/caracteristica_service.js",
@@ -50,7 +50,7 @@ const ARCHIVOS = [
     "js/control/factura_orden_producto_service.js",
     "js/control/factura_service.js",
     "js/control/instalador.js",
-     "js/control/menu_local.js",
+    "js/control/menu_local.js",
     "js/control/mesero_virtual.js",
     "js/control/orden_cliente.js",
     "js/control/orden_producto_service.js",
@@ -60,11 +60,12 @@ const ARCHIVOS = [
     "js/control/producto_caracteristica_service.js",
     "js/control/producto_service.js",
     "js/control/producto_tipo_producto_service.js",
-     "js/control/recepcion.js",
+    "js/control/recepcion.js",
     "js/control/rol_service.js",
     "js/control/router.js",
     "js/control/sesion.js",
     "js/control/texto.js",
+    "js/control/ultima_orden.js",
     "js/control/tipo_caracteristica_service.js",
     "js/control/tipo_descuento_service.js",
     "js/control/tipo_producto_service.js",

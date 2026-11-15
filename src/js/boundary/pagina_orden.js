@@ -2,6 +2,7 @@ import { ESTILOS } from "./estilos.js";
 import { TipoProductoServiceConCopia, ProductoTipoProductoServiceConCopia, textoFechaCopia } from "../control/menu_local.js";
 import OrdenCliente from "../control/orden_cliente.js";
 import { cola } from "../control/cola_ordenes.js";
+import { ultimaOrden } from "../control/ultima_orden.js";
 import { escapar, moneda, normalizar } from "../control/texto.js";import OrdenService from "../control/orden_service.js";
 import "./tarjeta_simple.js";
 import "./lista_productos.js";
@@ -38,6 +39,7 @@ class PaginaOrden extends HTMLElement {
         this.productoTipoProductoService = new ProductoTipoProductoServiceConCopia();
         this.ordenCliente = new OrdenCliente();
         this.cola = cola;
+        this.ultimaOrden = ultimaOrden;
         this.ordenService = new OrdenService();
         this.categorias = [];
         this.seleccionada = null;
@@ -71,6 +73,15 @@ class PaginaOrden extends HTMLElement {
                     .pedido { grid-template-columns: minmax(0, 2fr) minmax(18rem, 1fr); align-items: start; }
                     carrito-orden { position: sticky; top: var(--esp-4); }
                 }
+                .volver {
+                    display: flex;
+                    flex-wrap: wrap;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: var(--esp-3);
+                    margin-bottom: var(--esp-5);
+                }
+                .volver p { margin: 0; font-weight: 600; }
                 .confirmacion { text-align: center; }
                 .confirmacion .numero { font-family: var(--fuente-titulos); font-size: var(--texto-2xl); color: var(--color-primario); }
             </style>
@@ -79,6 +90,7 @@ class PaginaOrden extends HTMLElement {
                 <p>Elija una categoría, agregue sus productos y confirme su orden.</p>
             </section>
             <div id="armar">
+                <div class="tarjeta volver" id="volver" hidden></div>
                 <p class="alerta alerta--error" role="alert" id="error"></p>
                 <p class="alerta alerta--aviso" role="status" id="aviso-copia"></p>
                 <section aria-label="Categorías" aria-busy="true" id="seccion-categorias">
@@ -96,7 +108,25 @@ class PaginaOrden extends HTMLElement {
             this.shadowRoot.querySelector("carrito-orden").agregar(e.detail);
         });
         this.shadowRoot.addEventListener("cafefe:confirmar-orden", e => this.crearOrden(e.detail));
+               this.mostrarBotonVolver();
         this.cargar();
+    }
+
+    /** Si el cliente ya tiene una orden en camino, le deja volver a ver como va. */
+    mostrarBotonVolver() {
+        let volver = this.shadowRoot.querySelector("#volver");
+        let guardada = this.ultimaOrden.leer();
+        if (!guardada) {
+            volver.hidden = true;
+            volver.innerHTML = "";
+            return;
+        }
+        volver.innerHTML = `
+            <p>${escapar(guardada.cliente)}, tiene una orden en preparación.</p>
+            <button type="button" class="boton boton--acento" id="ver-orden">Ver cómo va mi orden</button>`;
+        volver.querySelector("#ver-orden").addEventListener("click", () =>
+            this.mostrarConfirmacion(guardada.cliente, { idOrden: guardada.idOrden }, guardada.total));
+        volver.hidden = false;
     }
 
     async cargar() {
@@ -172,6 +202,7 @@ class PaginaOrden extends HTMLElement {
         carrito.ocupado = true;
         try {
             let resultado = await this.ordenCliente.crear(cliente, items);
+            this.ultimaOrden.guardar(resultado.orden.idOrden, cliente, total);
             this.mostrarConfirmacion(cliente, resultado.orden, total);
             carrito.vaciar();
             this.dispatchEvent(new CustomEvent("cafefe:orden-creada", { detail: resultado, bubbles: true, composed: true }));
@@ -201,6 +232,12 @@ class PaginaOrden extends HTMLElement {
         let seguimiento = document.createElement("seguimiento-orden");
         seguimiento.ordenService = this.ordenService;
         seguimiento.setAttribute("orden", orden.idOrden);
+                // ya entregada: no hace falta seguir ofreciendo el boton para volver a verla
+        seguimiento.addEventListener("cafefe:estado-cambio", e => {
+            if (e.detail.estado === "ENTREGADA") {
+                this.ultimaOrden.olvidar();
+            }
+        });
         confirmacion.querySelector(".numero").after(seguimiento);
         confirmacion.querySelector("#otra").addEventListener("click", () => this.nuevaOrden());
         this.shadowRoot.querySelector("#armar").hidden = true;
@@ -225,6 +262,7 @@ class PaginaOrden extends HTMLElement {
         let confirmacion = this.shadowRoot.querySelector("#confirmacion");
         confirmacion.hidden = true;
         confirmacion.innerHTML = "";   // quita <seguimiento-orden> y deja de consultar
+        this.mostrarBotonVolver();
         this.shadowRoot.querySelector("#armar").hidden = false;
         this.shadowRoot.querySelector(".categoria:not(:disabled)")?.focus();
     }

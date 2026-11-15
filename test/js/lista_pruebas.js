@@ -14,6 +14,7 @@ export const UNITARIAS = [
     "control/orden_cliente_test",
     "control/cobro_test",
     "control/recepcion_test",
+    "control/ultima_orden_test",
     "control/caja_service_test",
     "control/caracteristica_service_test",
     "control/descuento_service_test",
@@ -46,6 +47,9 @@ export const UNITARIAS = [
     "boundary/pagina_pago_test",
     "boundary/pagina_recepcion_test",
     "boundary/seguimiento_orden_test",
+    "boundary/cafefe_encabezado_test",
+    "boundary/detalle_orden_test",
+    "boundary/pagina_no_encontrada_test",
     "boundary/cafefe_app_test"
 ];
 

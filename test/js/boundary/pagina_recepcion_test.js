@@ -117,6 +117,19 @@ suite("<pagina-recepcion> (HU3)", function () {
         chai.expect(pagina.shadowRoot.querySelector("#avanzar").disabled).to.equal(false);
     });
 
+    test("si no se puede consultar el estado deberia mostrar la orden igual y explicar el error", async function () {
+        let error = new DefaultError();
+        error.estado = 404;
+        error.mensaje = "No existe el registro";
+        ordenService.findEstado.rejects(error);
+        let pagina = await montarPagina();
+        elegir(pagina);
+        await esperar();
+        chai.expect(texto(pagina, "h2")).to.contain("Ana");
+        chai.expect(pagina.shadowRoot.querySelectorAll(".productos li")).to.have.lengthOf(2);
+        chai.expect(texto(pagina, "#error")).to.equal("No existe el registro");
+    });
+
     test("deberia mostrar el estado de cada orden al cambiar de una a otra", async function () {
         let pagina = await montarPagina();
         elegir(pagina);

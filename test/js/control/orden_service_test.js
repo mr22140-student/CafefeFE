@@ -1,5 +1,5 @@
 import OrdenService from "../../../src/js/control/orden_service.js";
-import { pruebasUnitarias } from "./pruebas_comunes.js";
+import { pruebasUnitarias, esperarRechazo } from "./pruebas_comunes.js";
 import * as chai from "../lib/chai/index.js";
 import sinon from "../lib/sinon/sinon-esm.js";
 
@@ -47,5 +47,25 @@ suite("OrdenService estado de preparacion", function () {
         chai.expect(opciones.method).to.equal("PUT");
         chai.expect(JSON.parse(opciones.body)).to.deep.equal({ estado: "EN_CAMINO" });
         chai.expect(resp.datos.estado).to.equal("EN_CAMINO");
+    });
+
+    test("findEstado de una orden que no existe deberia rechazar con 404", async function () {
+        stubFetch = sinon.stub(window, "fetch").resolves(new Response(null, { status: 404 }));
+        let err = await esperarRechazo(new OrdenService().findEstado(ID));
+        chai.expect(err.estado).to.equal(404);
+    });
+
+    test("cambiarEstado a un estado anterior deberia rechazar con el mensaje del servidor (422)", async function () {
+        stubFetch = sinon.stub(window, "fetch").resolves(new Response("La orden ya está ENTREGADA y no puede regresar a PREPARANDO.",
+            { status: 422, headers: { "Wrong-Parameter": "estado" } }));
+        let err = await esperarRechazo(new OrdenService().cambiarEstado(ID, "PREPARANDO"));
+        chai.expect(err.estado).to.equal(422);
+        chai.expect(err.mensaje).to.contain("no puede regresar");
+    });
+
+    test("sin conexion deberia rechazar con estado 0", async function () {
+        stubFetch = sinon.stub(window, "fetch").rejects(new TypeError("Failed to fetch"));
+        let err = await esperarRechazo(new OrdenService().findEstado(ID));
+        chai.expect(err.estado).to.equal(0);
     });
 });

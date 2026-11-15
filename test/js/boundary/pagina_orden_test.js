@@ -91,8 +91,10 @@ suite("<pagina-orden> crear la orden", function () {
     let tipoProductoService;
     let ordenCliente;
     let ordenService;
+    let ultimaOrden;
 
     setup(function () {
+        ultimaOrden = { leer: sinon.stub().returns(null), guardar: sinon.spy(), olvidar: sinon.spy() };
         tipoProductoService = { findRange: sinon.stub().resolves(respuesta(CATEGORIAS)) };
         ordenCliente = { crear: sinon.stub().resolves({ orden: { idOrden: "abcdef12-3456" }, detalles: [{}, {}] }) };
         ordenService = { findEstado: sinon.stub().resolves(respuesta({ idOrden: "abcdef12-3456", estado: "RECIBIDA" })) };
@@ -113,14 +115,14 @@ suite("<pagina-orden> crear la orden", function () {
     }
 
     test("un producto agregado en la lista deberia llegar al carrito", async function () {
-        let pagina = montar("pagina-orden", { tipoProductoService, ordenCliente, ordenService });
+        let pagina = montar("pagina-orden", { tipoProductoService, ordenCliente, ordenService, ultimaOrden });
         await esperar();
         let carrito = prepararCarrito(pagina);
         chai.expect(carrito.items).to.deep.equal([{ producto: AMERICANO, cantidad: 2 }]);
     });
 
     test("al confirmar deberia crear la orden y mostrar la confirmacion", async function () {
-        let pagina = montar("pagina-orden", { tipoProductoService, ordenCliente, ordenService });
+        let pagina = montar("pagina-orden", { tipoProductoService, ordenCliente, ordenService, ultimaOrden });
         await esperar();
         let creada = null;
         pagina.addEventListener("cafefe:orden-creada", e => { creada = e.detail; });
@@ -138,7 +140,7 @@ suite("<pagina-orden> crear la orden", function () {
     });
 
     test("la confirmacion deberia mostrar el seguimiento en tiempo real de la orden", async function () {
-        let pagina = montar("pagina-orden", { tipoProductoService, ordenCliente, ordenService });
+        let pagina = montar("pagina-orden", { tipoProductoService, ordenCliente, ordenService, ultimaOrden });
         await esperar();
         prepararCarrito(pagina).shadowRoot.querySelector("#formulario").requestSubmit();
         await esperar();
@@ -148,9 +150,46 @@ suite("<pagina-orden> crear la orden", function () {
         pagina.shadowRoot.querySelector("#otra").click();
         chai.expect(pagina.shadowRoot.querySelector("seguimiento-orden")).to.equal(null);
     });
+        test("al crear la orden deberia recordarla para poder volver a verla", async function () {
+        let pagina = montar("pagina-orden", { tipoProductoService, ordenCliente, ordenService, ultimaOrden });
+        await esperar();
+        prepararCarrito(pagina).shadowRoot.querySelector("#formulario").requestSubmit();
+        await esperar();
+        chai.expect(ultimaOrden.guardar.calledOnceWith("abcdef12-3456", "Marta", 7)).to.equal(true);
+    });
+
+    test("sin una orden guardada no deberia mostrar el boton para volver", async function () {
+        let pagina = montar("pagina-orden", { tipoProductoService, ordenCliente, ordenService, ultimaOrden });
+        await esperar();
+        chai.expect(pagina.shadowRoot.querySelector("#volver").hidden).to.equal(true);
+    });
+
+    test("con una orden guardada deberia ofrecer verla y abrir su seguimiento", async function () {
+        ultimaOrden.leer.returns({ idOrden: "abcdef12-3456", cliente: "Marta", total: 7 });
+        let pagina = montar("pagina-orden", { tipoProductoService, ordenCliente, ordenService, ultimaOrden });
+        await esperar();
+        let volver = pagina.shadowRoot.querySelector("#volver");
+        chai.expect(volver.hidden).to.equal(false);
+        chai.expect(volver.textContent).to.contain("Marta");
+        volver.querySelector("#ver-orden").click();
+        await esperar();
+        let confirmacion = pagina.shadowRoot.querySelector("#confirmacion");
+        chai.expect(confirmacion.hidden).to.equal(false);
+        chai.expect(confirmacion.querySelector("seguimiento-orden").getAttribute("orden")).to.equal("abcdef12-3456");
+        chai.expect(confirmacion.textContent).to.contain("$7.00");
+    });
+
+    test("al entregarse la orden deberia olvidarla", async function () {
+        ordenService.findEstado.resolves(respuesta({ idOrden: "abcdef12-3456", estado: "ENTREGADA" }));
+        let pagina = montar("pagina-orden", { tipoProductoService, ordenCliente, ordenService, ultimaOrden });
+        await esperar();
+        prepararCarrito(pagina).shadowRoot.querySelector("#formulario").requestSubmit();
+        await esperar(10);
+        chai.expect(ultimaOrden.olvidar.calledOnce).to.equal(true);
+    });
 
     test("hacer otra orden deberia volver a las categorias", async function () {
-        let pagina = montar("pagina-orden", { tipoProductoService, ordenCliente, ordenService });
+        let pagina = montar("pagina-orden", { tipoProductoService, ordenCliente, ordenService, ultimaOrden });
         await esperar();
         prepararCarrito(pagina).shadowRoot.querySelector("#formulario").requestSubmit();
         await esperar();
@@ -164,7 +203,7 @@ suite("<pagina-orden> crear la orden", function () {
         error.estado = 0;
         ordenCliente.crear.rejects(error);
         let cola = { agregar: sinon.spy() };
-        let pagina = montar("pagina-orden", { tipoProductoService, ordenCliente, ordenService, cola });
+        let pagina = montar("pagina-orden", { tipoProductoService, ordenCliente, ordenService, ultimaOrden, cola });
         await esperar();
         let carrito = prepararCarrito(pagina);
         carrito.shadowRoot.querySelector("#formulario").requestSubmit();
@@ -182,7 +221,7 @@ suite("<pagina-orden> crear la orden", function () {
         error.mensaje = "El producto ya no está disponible";
         ordenCliente.crear.rejects(error);
         let cola = { agregar: sinon.spy() };
-        let pagina = montar("pagina-orden", { tipoProductoService, ordenCliente, ordenService, cola });
+        let pagina = montar("pagina-orden", { tipoProductoService, ordenCliente, ordenService, ultimaOrden, cola });
         await esperar();
         let carrito = prepararCarrito(pagina);
         carrito.shadowRoot.querySelector("#formulario").requestSubmit();
