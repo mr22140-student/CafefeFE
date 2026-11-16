@@ -5,7 +5,7 @@ import { escapar } from "../control/texto.js";
 import "./boton_instalar.js";
 
 /**
- * <cafefe-encabezado>: logo, menu segun el rol, saludo, cerrar sesion e instalar.
+ * logo, menu segun el rol, saludo, cerrar sesion e instalar.
  * Se vuelve a dibujar solo cuando cambia la sesion o la ruta (reactivo).
  */
 class CafefeEncabezado extends HTMLElement {

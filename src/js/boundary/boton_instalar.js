@@ -1,10 +1,6 @@
 import { ESTILOS } from "./estilos.js";
 import { instalador, EVENTO_INSTALADOR } from "../control/instalador.js";
 
-/**
- * <boton-instalar>: solo aparece cuando el navegador permite instalar la PWA.
- * Al hacer clic muestra el dialogo de instalacion del navegador.
- */
 class BotonInstalar extends HTMLElement {
     constructor() {
         super();

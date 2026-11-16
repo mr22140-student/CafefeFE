@@ -9,7 +9,6 @@ function paginaActual(app) {
 }
 
 /**
- * Las pruebas y la app comparten localhost:3000, y con eso el mismo localStorage.
  * Aqui se monta la app de verdad (con fetch simulado que responde vacio), asi que
  * guardaria un menu vacio y cerraria la sesion real. Por eso se copia todo lo de
  * Cafefe ("cafefe.*") antes de las pruebas y se regresa igual al terminar.

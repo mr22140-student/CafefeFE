@@ -10,9 +10,8 @@ import "./pagina_pago.js";
 import "./pagina_no_encontrada.js";
 
 /**
- * <cafefe-app>: componente raiz de la SPA.
- * Escucha el hash de la URL y cambia la pagina sin recargar.
- * Las paginas piden navegar con el evento "cafefe:navegar" { detail: { ruta } }.
+ * componente raiz de la SPA
+ * Escucha el hash de la URL y cambia la pagina sin recargar
  */
 class CafefeApp extends HTMLElement {
     constructor() {
