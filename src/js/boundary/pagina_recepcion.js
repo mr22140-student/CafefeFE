@@ -103,12 +103,15 @@ class PaginaRecepcion extends HTMLElement {
     mostrarOrden(error = "") {
         let seleccion = this.seleccion;
         let id = seleccion.orden.idOrden;
+        let estadoConocido = id in this.estados;
         let estado = this.estadoDe(id);
         let cliente = seleccion.cliente || "Cliente sin nombre";
+        let botonBloqueado = this.ocupado || !estadoConocido;
+        let textoBoton = this.ocupado ? "Guardando…" : (estadoConocido ? ACCION[estado] : "Consultando estado…");
         let accion = estado === ESTADOS.ENTREGADA
             ? `<p class="alerta alerta--aviso" id="aviso" tabindex="-1">Orden entregada a ${escapar(cliente)}.</p>`
             : `<button type="button" class="boton ${estado === ESTADOS.EN_CAMINO ? "boton--acento" : ""} boton--bloque" id="avanzar"
-                       ${this.ocupado ? "disabled" : ""}>${this.ocupado ? "Guardando…" : ACCION[estado]}</button>`;
+                       ${botonBloqueado ? "disabled" : ""}>${textoBoton}</button>`;
         let panel = this.shadowRoot.querySelector("#panel");
         panel.innerHTML = `
             <h2 id="titulo-panel">Orden de ${escapar(cliente)}</h2>
@@ -125,7 +128,7 @@ class PaginaRecepcion extends HTMLElement {
 
     /** Guarda el siguiente estado en el backend; si falla, la orden se queda como estaba. */
     async avanzar() {
-        if (!this.seleccion || this.ocupado) {
+        if (!this.seleccion || this.ocupado || !(this.seleccion.orden.idOrden in this.estados)) {
             return;
         }
         let seleccion = this.seleccion;

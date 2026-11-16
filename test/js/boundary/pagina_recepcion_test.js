@@ -103,6 +103,29 @@ suite("<pagina-recepcion> (HU3)", function () {
         chai.expect(pagina.shadowRoot.querySelector("#avanzar")).to.equal(null);
     });
 
+    test("mientras no se sabe el estado el boton deberia estar deshabilitado", async function () {
+        let responder;
+        ordenService.findEstado.returns(new Promise(r => { responder = r; }));
+        let pagina = await montarPagina();
+        elegir(pagina);
+        await esperar();
+        chai.expect(pagina.shadowRoot.querySelector("#avanzar").disabled).to.equal(true);
+        responder(conEstado("ENTREGADA"));
+        await esperar();
+        chai.expect(pagina.shadowRoot.querySelector("#avanzar")).to.equal(null);
+        chai.expect(ordenService.cambiarEstado.called).to.equal(false);
+    });
+
+    test("si no se puede consultar el estado no deberia dejar avanzar la orden", async function () {
+        let error = new DefaultError();
+        error.estado = 0;
+        ordenService.findEstado.rejects(error);
+        let pagina = await montarPagina();
+        elegir(pagina);
+        await esperar();
+        chai.expect(pagina.shadowRoot.querySelector("#avanzar").disabled).to.equal(true);
+    });
+
     test("si el servidor no guarda el estado deberia mostrar el error y dejar la orden como estaba", async function () {
         let error = new DefaultError();
         error.estado = 0;
